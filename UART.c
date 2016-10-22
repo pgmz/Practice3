@@ -75,8 +75,8 @@ void UART5_RX_TX_IRQHandler(){
  	 \param[in]  baudRate sets the baud rate to transmit.
  	 \return void
  */
-void UART_init(UART_ChannelType uartChannel, uint32 systemClk, UART_BaudRateType baudRate){
-		float UARTbaudrate = systemClk/(16*baudRate);
+void UART_init(UART_ChannelType uartChannel, uint32 systemClk, UART_BaudRateType baudRate, uint8 BRFA){
+		float UARTbaudrate = systemClk/(16*baudRate) - (BRFA/32);
 		uint16 IBadrate = (uint16) UARTbaudrate;
 
 		switch(uartChannel){
@@ -86,6 +86,7 @@ void UART_init(UART_ChannelType uartChannel, uint32 systemClk, UART_BaudRateType
 			UART0_C1 = 0;
 			UART0_BDH = IBadrate>>8;
 			UART0_BDL = IBadrate;
+			UART0_C4 |= UART_C4_BRFA(BRFA);
 			UART0_C2 |= UART_C2_TE_MASK|UART_C2_RE_MASK;
 			break;
 
@@ -241,3 +242,42 @@ void UART_putString(UART_ChannelType uartChannel, sint8* string){
 }
 
 
+void UART_MailBoxFlag(UART_ChannelType uartChannel){
+	switch(uartChannel){
+	case UART_0:
+		return UART0_MailBox.flag;
+	case UART_1:
+		return UART1_MailBox.flag;
+	case UART_2:
+		return UART2_MailBox.flag;
+	case UART_3:
+		return UART3_MailBox.flag;
+	case UART_4:
+		return UART4_MailBox.flag;
+	case UART_5:
+		return UART5_MailBox.flag;
+	}
+}
+
+void UART_MailBoxData(UART_ChannelType uartChannel){
+	switch(uartChannel){
+	case UART_0:
+		UART0_MailBox.flag = FALSE;
+		return UART0_MailBox.mailBox;
+	case UART_1:
+		UART1_MailBox.flag = FALSE;
+		return UART1_MailBox.mailBox;
+	case UART_2:
+		UART2_MailBox.flag = FALSE;
+		return UART2_MailBox.mailBox;
+	case UART_3:
+		UART3_MailBox.flag = FALSE;
+		return UART3_MailBox.mailBox;
+	case UART_4:
+		UART4_MailBox.flag = FALSE;
+		return UART4_MailBox.mailBox;
+	case UART_5:
+		UART5_MailBox.flag = FALSE;
+		return UART5_MailBox.mailBox;
+	}
+}

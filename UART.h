@@ -30,7 +30,7 @@ typedef enum {UART_0,UART_1,UART_2,UART_3,UART_4,UART_5}UART_ChannelType;
 /**
  * \brief It defines some common transmission baud rates
  */
-typedef enum {BD_4800=4800,BD_9600=9600,BD_5600=5600, BD_115200=115200}UART_BaudRateType;
+typedef enum {BD_4800=4800,BD_9600=9600,BD_5600=5600, BD_115200=115200, BD_38400=38400}UART_BaudRateType;
 
 /********************************************************************************************/
 /********************************************************************************************/
@@ -51,9 +51,10 @@ typedef enum {BD_4800=4800,BD_9600=9600,BD_5600=5600, BD_115200=115200}UART_Baud
  	 \param[in]  uartChannel indicates which UART will be used.
  	 \param[in]  systemClk indicates the MCU frequency.
  	 \param[in]  baudRate sets the baud rate to transmit.
+ 	 \param[in]  BRFA sets the optional fine adjustment
  	 \return void
  */
-void UART_init(UART_ChannelType uartChannel, uint32 systemClk, UART_BaudRateType baudRate);
+void UART_init(UART_ChannelType uartChannel, uint32 systemClk, UART_BaudRateType baudRate, uint8 BRFA);
 
 /********************************************************************************************/
 /********************************************************************************************/
@@ -90,6 +91,10 @@ void UART_putChar (UART_ChannelType uartChannel, uint8 character);
  	 \return void
  */
 void UART_putString(UART_ChannelType uartChannel, sint8* string);
+
+void UART_MailBoxFlag(UART_ChannelType uartChannel);
+
+void UART_MailBoxData(UART_ChannelType uartChannel);
 
 #endif /* UART_H_ */
 
