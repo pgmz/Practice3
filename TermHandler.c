@@ -5,12 +5,13 @@
  *      Author: Patricio Gomez
  */
 
+#include "TermHandler.h"
 
 uint8 TERM2_init(){
 	GPIO_clockGating(GPIOC);
-	GPIO_pinControlRegisterType = GPIO_MUX3;
-	GPIO_pinControlRegister(GPIOC, BIT14, &GPIO_pinControlRegister);
-	GPIO_pinControlRegister(GPIOC, BIT15, &GPIO_pinControlRegister);
+	GPIO_pinControlRegisterType pinControlRegister = GPIO_MUX3;
+	GPIO_pinControlRegister(GPIOC, BIT14, &pinControlRegister);
+	GPIO_pinControlRegister(GPIOC, BIT15, &pinControlRegister);
 
 	UART_init(UART_4, SYSTEM_CLOCK, BD_9600, 19);
 	UART0_interruptEnable(UART_4);

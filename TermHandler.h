@@ -10,6 +10,10 @@
 
 
 #include "UART.h"
+#include "GPIO.h"
+#include "NVIC.h"
+
+#define SYSTEM_CLOCK 110000000
 
 typedef enum{
 	MenuDisp = 0,

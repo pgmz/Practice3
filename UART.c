@@ -242,7 +242,7 @@ void UART_putString(UART_ChannelType uartChannel, sint8* string){
 }
 
 
-void UART_MailBoxFlag(UART_ChannelType uartChannel){
+uint8 UART_MailBoxFlag(UART_ChannelType uartChannel){
 	switch(uartChannel){
 	case UART_0:
 		return UART0_MailBox.flag;
@@ -259,7 +259,7 @@ void UART_MailBoxFlag(UART_ChannelType uartChannel){
 	}
 }
 
-void UART_MailBoxData(UART_ChannelType uartChannel){
+uint8 UART_MailBoxData(UART_ChannelType uartChannel){
 	switch(uartChannel){
 	case UART_0:
 		UART0_MailBox.flag = FALSE;

@@ -11,8 +11,8 @@
 #include "DataTypeDefinitions.h"
 #include "I2C.h"
 
-#define CONTROL_W 1101110
-#define CONTROL_R 1101111
+#define CONTROL_W 0x6E
+#define CONTROL_R 0x6F
 
 #define RTCSEC 0x0
 #define RTCMIN 0x1
@@ -58,9 +58,9 @@ uint8 RTC_writeHour(RTC_ConfigType* config);
 
 uint8 RTC_writeDate(RTC_ConfigType* config);
 
-uint8 RTC_readHour();
+uint8 RTC_readHour(RTC_ConfigType* read);
 
-uint8 RTC_readDate();
+uint8 RTC_readDate(RTC_ConfigType* read);
 
 uint8 RTC_setAlarm0(RTC_ConfigType* alarm0);
 

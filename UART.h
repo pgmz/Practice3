@@ -92,9 +92,9 @@ void UART_putChar (UART_ChannelType uartChannel, uint8 character);
  */
 void UART_putString(UART_ChannelType uartChannel, sint8* string);
 
-void UART_MailBoxFlag(UART_ChannelType uartChannel);
+uint8 UART_MailBoxFlag(UART_ChannelType uartChannel);
 
-void UART_MailBoxData(UART_ChannelType uartChannel);
+uint8 UART_MailBoxData(UART_ChannelType uartChannel);
 
 #endif /* UART_H_ */
 
