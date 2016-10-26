@@ -7,7 +7,6 @@
 
 #include "UART.h"
 #include "MK64F12.h"
-#include "NVIC.h"
 #include "DataTypeDefinitions.h"
 
 /*!
@@ -17,51 +16,13 @@
  */
 
 
-UART_MailBoxType UART0_MailBox = {FALSE,0x0};
-UART_MailBoxType UART1_MailBox = {FALSE,0x0};
-UART_MailBoxType UART2_MailBox = {FALSE,0x0};
-UART_MailBoxType UART3_MailBox = {FALSE,0x0};
-UART_MailBoxType UART4_MailBox = {FALSE,0x0};
-UART_MailBoxType UART5_MailBox = {FALSE,0x0};
+UART_MailBoxType UART0_MailBox = {0x0,0x0};
 
-void UART0_RX_TX_IRQHandler(){
-	while (!(UART0_S1 & UART_S1_RDRF_MASK));
-		UART0_MailBox.flag = TRUE;
-		UART0_MailBox.mailBox = UART0_D;
-}
-
-
-void UART1_RX_TX_IRQHandler(){
-	while (!(UART1_S1 & UART_S1_RDRF_MASK));
-		UART1_MailBox.flag = TRUE;
-		UART1_MailBox.mailBox = UART1_D;
-}
-
-
-void UART2_RX_TX_IRQHandler(){
-	while (!(UART2_S1 & UART_S1_RDRF_MASK));
-		UART2_MailBox.flag = TRUE;
-		UART2_MailBox.mailBox = UART2_D;
-}
-
-
-void UART3_RX_TX_IRQHandler(){
-	while (!(UART3_S1 & UART_S1_RDRF_MASK));
-		UART3_MailBox.flag = TRUE;
-		UART3_MailBox.mailBox = UART3_D;
-}
-
-
-void UART4_RX_TX_IRQHandler(){
-	while (!(UART4_S1 & UART_S1_RDRF_MASK));
-		UART4_MailBox.flag = TRUE;
-		UART4_MailBox.mailBox = UART4_D;
-}
-
-void UART5_RX_TX_IRQHandler(){
-	while (!(UART5_S1 & UART_S1_RDRF_MASK));
-		UART5_MailBox.flag = TRUE;
-		UART5_MailBox.mailBox = UART5_D;
+void UART0_Status_IRQHandler(void){
+	while (!(UART0_S1 & UART_S1_RDRF_MASK)){
+		UART0_MailBox.mailBox =UART0_D;
+		UART_S1_RDRF_MASK != UART_S1_RDRF_MASK;
+	}
 }
 
 //
@@ -75,69 +36,19 @@ void UART5_RX_TX_IRQHandler(){
  	 \param[in]  baudRate sets the baud rate to transmit.
  	 \return void
  */
-void UART_init(UART_ChannelType uartChannel, uint32 systemClk, UART_BaudRateType baudRate, uint8 BRFA){
-		float UARTbaudrate = systemClk/(16*baudRate) - (BRFA/32);
-		uint16 IBadrate = (uint16) UARTbaudrate;
+void UART_init(UART_ChannelType uartChannel, uint32 systemClk, UART_BaudRateType baudRate){
+	float UARTbaudrate = systemClk/(16*baudRate);
+	SIM_SCGC4 = SIM_SCGC4_UART0_MASK;
+	UART0_C2 &= ~(1 << UART_C2_TE_MASK);
+	UART0_C2 &= ~(1 << UART_C2_RE_MASK);
+	UART0_BDH |= UART_BDH_SBR(0x1200);
+	UART0_BDL |= UART_BDL_SBR(0x0);
+	UART0_C4 |= UART_C4_BRFA(0x0);
+	UART0_C2 |= 1 << UART_C2_TE_MASK;
+	UART0_C2 |= 1 << UART_C2_RE_MASK;
+}
 
-		switch(uartChannel){
-		case UART_0:
-			SIM_SCGC4 |= SIM_SCGC4_UART0_MASK;
-			UART0_C2 &= ~(UART_C2_TE_MASK | UART_C2_RE_MASK);
-			UART0_C1 = 0;
-			UART0_BDH = IBadrate>>8;
-			UART0_BDL = IBadrate;
-			UART0_C4 |= UART_C4_BRFA(BRFA);
-			UART0_C2 |= UART_C2_TE_MASK|UART_C2_RE_MASK;
-			break;
-
-		case UART_1:
-			SIM_SCGC4 |= SIM_SCGC4_UART1_MASK;
-			UART1_C2 &= ~(UART_C2_TE_MASK | UART_C2_RE_MASK);
-			UART1_C1 = 0;
-			UART1_BDH = IBadrate>>8;
-			UART1_BDL = IBadrate;
-			UART1_C2 |= UART_C2_TE_MASK|UART_C2_RE_MASK;
-			break;
-
-		case UART_2:
-			SIM_SCGC4 |= SIM_SCGC4_UART2_MASK;
-			UART2_C2 &= ~(UART_C2_TE_MASK | UART_C2_RE_MASK);
-			UART2_C1 = 0;
-			UART2_BDH = IBadrate>>8;
-			UART2_BDL = IBadrate;
-			UART2_C2 |= UART_C2_TE_MASK|UART_C2_RE_MASK;
-			break;
-
-		case UART_3:
-			SIM_SCGC4 |= SIM_SCGC4_UART3_MASK;
-			UART3_C2 &= ~(UART_C2_TE_MASK | UART_C2_RE_MASK);
-			UART3_C1 = 0;
-			UART3_BDH = IBadrate>>8;
-			UART3_BDL = IBadrate;
-			UART3_C2 |= UART_C2_TE_MASK|UART_C2_RE_MASK;
-			break;
-
-		case UART_4:
-			SIM_SCGC1 |= SIM_SCGC1_UART4_MASK;
-			UART4_C2 &= ~(UART_C2_TE_MASK | UART_C2_RE_MASK);
-			UART4_C1 = 0;
-			UART4_BDH = IBadrate>>8;
-			UART4_BDL = IBadrate;
-			UART4_C2 |= UART_C2_TE_MASK|UART_C2_RE_MASK;
-			break;
-
-		case UART_5:
-			SIM_SCGC1 |= SIM_SCGC1_UART5_MASK;
-			UART5_C2 &= ~(UART_C2_TE_MASK | UART_C2_RE_MASK);
-			UART5_C1 = 0;
-			UART5_BDH = IBadrate>>8;
-			UART5_BDL = IBadrate;
-			UART5_C2 |= UART_C2_TE_MASK|UART_C2_RE_MASK;
-			break;
-		}
-
-
-
+void display(){
 
 }
 
@@ -152,32 +63,7 @@ void UART_init(UART_ChannelType uartChannel, uint32 systemClk, UART_BaudRateType
  	 \return void
  */
 void UART0_interruptEnable(UART_ChannelType uartChannel){
-	switch(uartChannel){
-	case UART_0:
-		UART0_C2 |= UART_C2_RIE_MASK;
-		break;
-
-	case UART_1:
-		UART1_C2 |= UART_C2_RIE_MASK;
-		break;
-
-	case UART_2:
-		UART2_C2 |= UART_C2_RIE_MASK;
-		break;
-
-	case UART_3:
-		UART3_C2 |= UART_C2_RIE_MASK;
-		break;
-
-	case UART_4:
-		UART4_C2 |= UART_C2_RIE_MASK;
-		break;
-
-	case UART_5:
-		UART5_C2 |= UART_C2_RIE_MASK;
-		break;
-
-	}
+	UART0_C2 = UART_C2_RIE_MASK;
 }
 
 /********************************************************************************************/
@@ -192,37 +78,10 @@ void UART0_interruptEnable(UART_ChannelType uartChannel){
  	 \return void
  */
 
+
 void UART_putChar (UART_ChannelType uartChannel, uint8 character){
-	switch(uartChannel){
-	case UART_0:
-		while(!(UART0_S1 & UART_S1_TDRE_MASK));
-		UART0_D = (uint8)character;
-		break;
-
-	case UART_1:
-		while(!(UART1_S1 & UART_S1_TDRE_MASK));
-		UART1_D = (uint8)character;
-		break;
-
-	case UART_2:
-		while(!(UART2_S1 & UART_S1_TDRE_MASK));
-		UART2_D = (uint8)character;
-		break;
-
-	case UART_3:
-		while(!(UART3_S1 & UART_S1_TDRE_MASK));
-		UART3_D = (uint8)character;
-		break;
-
-	case UART_4:
-		while(!(UART4_S1 & UART_S1_TDRE_MASK));
-		UART4_D = (uint8)character;
-		break;
-
-	case UART_5:
-		while(!(UART5_S1 & UART_S1_TDRE_MASK));
-		UART5_D = (uint8)character;
-		break;
+	while (FALSE == UART_S1_TDRE_MASK ){
+		UART0_D = character;
 	}
 }
 /********************************************************************************************/
@@ -235,49 +94,9 @@ void UART_putChar (UART_ChannelType uartChannel, uint8 character){
  	 \return void
  */
 void UART_putString(UART_ChannelType uartChannel, sint8* string){
-
 	while (*string){
-		UART_putChar(uartChannel,*string++);
-		}
-}
-
-
-uint8 UART_MailBoxFlag(UART_ChannelType uartChannel){
-	switch(uartChannel){
-	case UART_0:
-		return UART0_MailBox.flag;
-	case UART_1:
-		return UART1_MailBox.flag;
-	case UART_2:
-		return UART2_MailBox.flag;
-	case UART_3:
-		return UART3_MailBox.flag;
-	case UART_4:
-		return UART4_MailBox.flag;
-	case UART_5:
-		return UART5_MailBox.flag;
+		UART_putChar(UART_0,*string++);
 	}
 }
 
-uint8 UART_MailBoxData(UART_ChannelType uartChannel){
-	switch(uartChannel){
-	case UART_0:
-		UART0_MailBox.flag = FALSE;
-		return UART0_MailBox.mailBox;
-	case UART_1:
-		UART1_MailBox.flag = FALSE;
-		return UART1_MailBox.mailBox;
-	case UART_2:
-		UART2_MailBox.flag = FALSE;
-		return UART2_MailBox.mailBox;
-	case UART_3:
-		UART3_MailBox.flag = FALSE;
-		return UART3_MailBox.mailBox;
-	case UART_4:
-		UART4_MailBox.flag = FALSE;
-		return UART4_MailBox.mailBox;
-	case UART_5:
-		UART5_MailBox.flag = FALSE;
-		return UART5_MailBox.mailBox;
-	}
-}
+
