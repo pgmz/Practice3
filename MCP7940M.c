@@ -22,15 +22,15 @@ uint8 RTC_init(){
 
 uint8 RTC_write(uint8 address, uint8 data){
 	I2C_start(I2C_0);
-	I2C_write_Byte(CONTROL_W, I2C_0);
+	I2C_write_Byte(I2C_0, CONTROL_W);
 	I2C_wait(I2C_0);
 	I2C_get_ACK(I2C_0);
 
-	I2C_write_Byte(address, I2C_0);
+	I2C_write_Byte(I2C_0, address);
 	I2C_wait(I2C_0);
 	I2C_get_ACK(I2C_0);
 
-	I2C_write_Byte(data, I2C_0);
+	I2C_write_Byte(I2C_0, address);
 	I2C_wait(I2C_0);
 	I2C_get_ACK(I2C_0);
 

@@ -13,7 +13,8 @@
 #include "GPIO.h"
 #include "NVIC.h"
 
-#define SYSTEM_CLOCK 110000000
+//#define SYSTEM_CLOCK 110000000
+#define SYSTEM_CLOCK 21000000
 
 typedef enum{
 	MenuDisp = 0,
@@ -39,14 +40,50 @@ typedef struct{
 	void (*ftpr_CommunicationDisp)(UART_ChannelType);
 }Term_MenuDisplayPointerType;
 
+#define TERM1_USE 1
+#define TERM2_USE 2
+
+typedef enum{
+	Option_param,
+	Hour_param,
+	Date_param,
+	Address_param
+}Term_inputParametersType;
+
 typedef struct{
-	uint8 Term1_RTC :1;
-	uint8 Term2_RTC :1;
-	uint8 Term1_Memory :1;
-	uint8 Term2_Menory :1;
+	uint8 currentMenu :2;
+	uint8 waitingForParameter :1;
+	uint8 curretMenuParameter;
+}Term_TXRXStateMachineType;
+
+typedef struct{
+	uint8 RTC_access :1;
+	uint8 MEM_access :1;
+	uint8 LCD_access :1;
+	uint8 TERM1_chat :1;
+	uint8 TERM2_chat :1;
+	uint8 TERM1_comm : 1;
+	uint8 TERM2_comm :1;
 }Term_StateMachineType;
 
+uint8 TERMHANDLER_init();
 
+uint8 TERM2_init();
+
+
+void TERM2_display();
+
+void TERM_menuDisp(UART_ChannelType uartChannel);
+
+void TERM_readI2CDisp(UART_ChannelType uartChannel);
+
+void TERM_writeI2CDisp(UART_ChannelType uartChannel);
+
+void TERM_setHourDisp(UART_ChannelType uartChannel);
+
+void TERM_setDateDisp(UART_ChannelType uartChannel);
+
+void TERM_setHourFormatDisp(UART_ChannelType uartChannel);
 
 
 

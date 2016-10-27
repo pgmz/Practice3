@@ -37,16 +37,19 @@ void I2C_init(I2C_ChannelType channel, uint32 systemClock, uint8 baudRate){
 	switch(channel){
 	case I2C_0:
 		SIM->SCGC4 |= SIM_SCGC4_I2C0_MASK;
-
+		I2C0_F = 0x14;
+		I2C0_C1 = I2C_C1_IICEN_MASK;
 		break;
 	case I2C_1:
 		SIM->SCGC4 |= SIM_SCGC4_I2C1_MASK;
-
+		I2C1_F = 0x14;
+		I2C1_C1 = I2C_C1_IICEN_MASK;
 		break;
 
 	case I2C_2:		
 		SIM->SCGC1 |= SIM_SCGC1_I2C2_MASK; 
-		
+		I2C2_F = 0x14;
+		I2C2_C1 = I2C_C1_IICEN_MASK;
 		break;
 
 	default:
@@ -63,7 +66,7 @@ uint8 I2C_busy(I2C_ChannelType channel){
 
 	case I2C_0:
 
-		if((I2C0_S &= I2C_S_BUSY_MASK) == FALSE ){
+		if((I2C0_S & I2C_S_BUSY_MASK) == FALSE ){
 			return FALSE;
 		}else{
 			return TRUE;
@@ -72,7 +75,7 @@ uint8 I2C_busy(I2C_ChannelType channel){
 
 	case I2C_1:
 
-		if((I2C1_S &= I2C_S_BUSY_MASK) == FALSE ){
+		if((I2C1_S & I2C_S_BUSY_MASK) == FALSE ){
 			return FALSE;
 		}else{
 			return TRUE;
@@ -81,7 +84,7 @@ uint8 I2C_busy(I2C_ChannelType channel){
 
 	case I2C_2:
 
-		if((I2C2_S &= I2C_S_BUSY_MASK) == FALSE ){
+		if((I2C2_S & I2C_S_BUSY_MASK) == FALSE ){
 			return FALSE;
 		}else{
 			return TRUE;
@@ -111,12 +114,9 @@ void I2C_MST_OrSLV_Mode(I2C_ChannelType channel, uint8 master_slave){
 
 	case I2C_0:
 
-		if(master_slave == FALSE){
-			I2C0_C1 &= ~(I2C_C1_MST_MASK);
-		}
-		else{
-			I2C0_C1 |= I2C_C1_MST_MASK;
-		}
+		I2C0_C1 &= ~(I2C_C1_MST_MASK);
+		I2C0_C1 |= I2C_C1_MST(master_slave);
+
 		break;
 
 	case I2C_1:
@@ -153,12 +153,8 @@ void I2C_TX_RX_Mode(I2C_ChannelType channel, uint8 TX_RX){
 
 	case I2C_0:
 
-		if(TX_RX == FALSE){
-			I2C0_C1 &= ~(I2C_C1_TX_MASK);
-		}
-		else{
-			I2C0_C1 |= I2C_C1_TX_MASK;
-		}
+		I2C0_C1 &= ~(I2C_C1_TX_MASK);
+		I2C0_C1 |= I2C_C1_TX(TX_RX);
 		break;
 
 	case I2C_1:
@@ -285,14 +281,13 @@ void I2C_write_Byte(I2C_ChannelType channel,uint8 data){
 uint8  I2C_read_Byte(I2C_ChannelType channel){
 	switch(channel){
 	case I2C_0:
-
-		break;
+		return I2C0_D;
 
 	case I2C_1:
-		break;
+		return I2C1_D;
 
 	case I2C_2:
-		break;
+		return I2C2_D;
 
 	default:
 		break;
@@ -312,12 +307,15 @@ uint8  I2C_read_Byte(I2C_ChannelType channel){
 void I2C_wait(I2C_ChannelType channel){
 	switch(channel){
 	case I2C_0:
-
+		while(I2C_busy(channel));
 		break;
+
 	case I2C_1:
+		while(I2C_busy(channel));
 		break;
 
 	case I2C_2:
+		while(I2C_busy(channel));
 		break;
 
 	default:
@@ -337,13 +335,13 @@ void I2C_wait(I2C_ChannelType channel){
 uint16 I2C_get_ACK(I2C_ChannelType channel){
 	switch(channel){
 	case I2C_0:
+		return ((I2C0_S & I2C_S_RXAK_MASK) == FALSE)?(FALSE):(TRUE);
 
-		break;
 	case I2C_1:
-		break;
+		return ((I2C1_S & I2C_S_RXAK_MASK) == FALSE)?(FALSE):(TRUE);
 
 	case I2C_2:
-		break;
+		return ((I2C2_S & I2C_S_RXAK_MASK) == FALSE)?(FALSE):(TRUE);
 
 	default:
 		break;
@@ -364,17 +362,15 @@ uint16 I2C_get_ACK(I2C_ChannelType channel){
 void I2C_start(I2C_ChannelType channel){
 	switch(channel){
 	case I2C_0:
-		I2C_TX_RX_Mode(I2C_0,BIT_ON);
-
+		I2C0_C1 |= I2C_C1_MST_MASK;
 		break;
-	case I2C_1:
-		I2C_TX_RX_Mode(I2C_1,BIT_ON);
 
+	case I2C_1:
+		I2C1_C1 |= I2C_C1_MST_MASK;
 		break;
 
 	case I2C_2:
-		I2C_TX_RX_Mode(I2C_2,BIT_ON);
-
+		I2C2_C1 |= I2C_C1_MST_MASK;
 		break;
 
 	default:
@@ -396,17 +392,15 @@ void I2C_start(I2C_ChannelType channel){
 void I2C_stop(I2C_ChannelType channel){
 	switch(channel){
 		case I2C_0:
-			I2C_TX_RX_Mode(I2C_0,BIT_OFF);
-
+			I2C0_C1 &= ~I2C_C1_MST_MASK;
 			break;
-		case I2C_1:
-			I2C_TX_RX_Mode(I2C_1,BIT_OFF);
 
+		case I2C_1:
+			I2C1_C1 &= ~I2C_C1_MST_MASK;
 			break;
 
 		case I2C_2:
-			I2C_TX_RX_Mode(I2C_2,BIT_OFF);
-
+			I2C2_C1 &= ~I2C_C1_MST_MASK;
 			break;
 
 		default:

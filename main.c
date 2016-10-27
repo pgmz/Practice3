@@ -16,6 +16,8 @@
  *   contributors may be used to endorse or promote products derived from this
  *   software without specific prior written permission.
  *
+ *
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -29,6 +31,8 @@
  */
 
 #include "MK64F12.h"
+#include "MCP7940M.h"
+#include "TermHandler.h"
 
 static int i = 0;
 
@@ -37,9 +41,12 @@ int main(void)
 
     /* Write your code here */
 
+	TERMHANDLER_init();
+	RTC_init();
     /* This for loop should be replaced. By default this loop allows a single stepping. */
     for (;;) {
         i++;
+        RTC_write(0x00, 0xAA);
     }
     /* Never leave main */
     return 0;

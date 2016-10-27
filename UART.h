@@ -1,13 +1,4 @@
-/**
-	\file
-	\brief
-		This is the header file for the UART device driver.
-		It contains the macros and function definition.
-	\author J. Luis Pizano Escalante, luispizano@iteso.mx
-	\date	27/07/2015
-	\todo
-		To implement all needed functions
- */
+
 #ifndef UART_H_
 #define UART_H_
 
@@ -27,10 +18,14 @@ typedef struct{
  */
 typedef enum {UART_0,UART_1,UART_2,UART_3,UART_4,UART_5}UART_ChannelType;
 
+
+typedef enum {BRFA_0 = 0, BRFA_1, BRFA_2, BRFA_3, BRFA_4, BRFA_5, BRFA_6, BRFA_7, BRFA_8, BRFA_9,
+BRFA_10, BRFA_11, BRFA_12, BRFA_13, BRFA_14, BRFA_15, BRFA_16, BRFA_17, BRFA_18, BRFA_19}BRFA;
+
 /**
  * \brief It defines some common transmission baud rates
  */
-typedef enum {BD_4800=4800,BD_9600=9600,BD_5600=5600, BD_115200=115200}UART_BaudRateType;
+typedef enum {BD_4800=4800,BD_9600=9600,BD_5600=5600, BD_115200=115200, BD_38400=38400}UART_BaudRateType;
 
 /********************************************************************************************/
 /********************************************************************************************/
@@ -40,17 +35,7 @@ typedef enum {BD_4800=4800,BD_9600=9600,BD_5600=5600, BD_115200=115200}UART_Baud
  	 \param[in]  void.
  	 \return void
  */
-
-typedef struct{
-	/*currentState is determined by the SDF received*/
-	MenuStateType currentState;
-	/*StateDisplay is a function pointer that receives the SDF, that indicates
-	 * what to print in the LCD, taking in account SDF*/
-	void (*StateDisplay)(SystemDisplayFlags*);
-}StateDisplay;
-
-void UART_INIT();
-void UART0_Status_IRQHandler(void);
+//void UART0_Status_IRQHandler(void);
 
 //
 /********************************************************************************************/
@@ -61,9 +46,10 @@ void UART0_Status_IRQHandler(void);
  	 \param[in]  uartChannel indicates which UART will be used.
  	 \param[in]  systemClk indicates the MCU frequency.
  	 \param[in]  baudRate sets the baud rate to transmit.
+ 	 \param[in]  BRFA sets the optional fine adjustment
  	 \return void
  */
-void UART_init(UART_ChannelType uartChannel, uint32 systemClk, UART_BaudRateType baudRate);
+void UART_init(UART_ChannelType uartChannel, uint32 systemClk, UART_BaudRateType baudRate, uint8 BRFA);
 
 /********************************************************************************************/
 /********************************************************************************************/
@@ -101,5 +87,8 @@ void UART_putChar (UART_ChannelType uartChannel, uint8 character);
  */
 void UART_putString(UART_ChannelType uartChannel, sint8* string);
 
-#endif /* UART_H_ */
+uint8 UART_MailBoxFlag(UART_ChannelType uartChannel);
 
+uint8 UART_MailBoxData(UART_ChannelType uartChannel);
+
+#endif /* UART_H_ */

@@ -52,6 +52,8 @@ typedef struct{
 }RTC_ConfigType;
 
 
+uint8 RTC_init();
+
 uint8 RTC_write(uint8 address, uint8 data);
 
 uint8 RTC_writeHour(RTC_ConfigType* config);
