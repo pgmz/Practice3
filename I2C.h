@@ -182,3 +182,4 @@ void I2C_start(I2C_ChannelType channel);
 void I2C_stop(I2C_ChannelType channel);
 
 #endif /* I2C_H_ */
+

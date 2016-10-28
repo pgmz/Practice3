@@ -11,8 +11,8 @@
 #include "DataTypeDefinitions.h"
 #include "I2C.h"
 
-#define CONTROL_W 0x6E
-#define CONTROL_R 0x6F
+#define CONTROL_W 0xDE
+#define CONTROL_R 0xDF
 
 #define RTCSEC 0x0
 #define RTCMIN 0x1
@@ -55,6 +55,8 @@ typedef struct{
 uint8 RTC_init();
 
 uint8 RTC_write(uint8 address, uint8 data);
+
+uint8 RTC_read(uint8 address);
 
 uint8 RTC_writeHour(RTC_ConfigType* config);
 

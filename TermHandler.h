@@ -25,23 +25,8 @@ typedef enum{
 	SetHourFormatDisp,
 	ReadHourDisp,
 	ReadDateDisp,
-	CommunicationDisp,
+	CommunicationDisp
 }Term_MenuDisplayType;
-
-typedef struct{
-	void (*ftpr_MenuDisp)(UART_ChannelType);
-	void (*ftpr_ReadI2CDisp)(UART_ChannelType);
-	void (*ftpr_WriteI2CDisp)(UART_ChannelType);
-	void (*ftpr_SetHourDisp)(UART_ChannelType);
-	void (*ftpr_SetDateDisp)(UART_ChannelType);
-	void (*ftpr_SetHourFormatDisp)(UART_ChannelType);
-	void (*ftpr_ReadHourDisp)(UART_ChannelType);
-	void (*ftpr_ReadDateDisp)(UART_ChannelType);
-	void (*ftpr_CommunicationDisp)(UART_ChannelType);
-}Term_MenuDisplayPointerType;
-
-#define TERM1_USE 1
-#define TERM2_USE 2
 
 typedef enum{
 	Option_param,
@@ -50,26 +35,32 @@ typedef enum{
 	Address_param
 }Term_inputParametersType;
 
-typedef struct{
-	uint8 currentMenu :2;
-	uint8 waitingForParameter :1;
-	uint8 curretMenuParameter;
-}Term_TXRXStateMachineType;
+typedef void (*ftpr_Disp)(UART_ChannelType);
 
 typedef struct{
-	uint8 RTC_access :1;
-	uint8 MEM_access :1;
-	uint8 LCD_access :1;
-	uint8 TERM1_chat :1;
-	uint8 TERM2_chat :1;
-	uint8 TERM1_comm : 1;
-	uint8 TERM2_comm :1;
+	uint8 currentMenu :4;
+	uint8 currentMenuParameter;
+	uint8 address;
+	uint32 data;
 }Term_StateMachineType;
+
+typedef struct{
+	uint8 param_in;
+	uint8 currentState :1;
+	uint8 nextState :1;
+}Term_StateChangesType;
 
 uint8 TERMHANDLER_init();
 
+uint8 TERM1_init();
+
 uint8 TERM2_init();
 
+void TERM1_upd();
+
+void TERM2_upd();
+
+void TERMHANDLER_upd();
 
 void TERM2_display();
 
@@ -85,6 +76,11 @@ void TERM_setDateDisp(UART_ChannelType uartChannel);
 
 void TERM_setHourFormatDisp(UART_ChannelType uartChannel);
 
+void TERM_readHourDisp(UART_ChannelType uartChannel);
+
+void TERM_readDateDisp(UART_ChannelType uartChannel);
+
+void TERM_communicationDisp(UART_ChannelType uartChannel);
 
 
 #endif /* SOURCES_TERMHANDLER_H_ */

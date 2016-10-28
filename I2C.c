@@ -37,19 +37,19 @@ void I2C_init(I2C_ChannelType channel, uint32 systemClock, uint8 baudRate){
 	switch(channel){
 	case I2C_0:
 		SIM->SCGC4 |= SIM_SCGC4_I2C0_MASK;
-		I2C0_F = 0x14;
-		I2C0_C1 = I2C_C1_IICEN_MASK;
+		I2C0_F = 0x8C;
+		I2C0_C1 |= I2C_C1_IICEN_MASK;
 		break;
 	case I2C_1:
 		SIM->SCGC4 |= SIM_SCGC4_I2C1_MASK;
 		I2C1_F = 0x14;
-		I2C1_C1 = I2C_C1_IICEN_MASK;
+		I2C1_C1 |= I2C_C1_IICEN_MASK;
 		break;
 
 	case I2C_2:		
 		SIM->SCGC1 |= SIM_SCGC1_I2C2_MASK; 
 		I2C2_F = 0x14;
-		I2C2_C1 = I2C_C1_IICEN_MASK;
+		I2C2_C1 |= I2C_C1_IICEN_MASK;
 		break;
 
 	default:
@@ -66,12 +66,7 @@ uint8 I2C_busy(I2C_ChannelType channel){
 
 	case I2C_0:
 
-		if((I2C0_S & I2C_S_BUSY_MASK) == FALSE ){
-			return FALSE;
-		}else{
-			return TRUE;
-		}
-		break;
+		return ((I2C0_S & I2C_S_BUSY_MASK) == FALSE)?(FALSE):(TRUE);
 
 	case I2C_1:
 
@@ -253,14 +248,17 @@ void I2C_repeted_Start(I2C_ChannelType channel){
 void I2C_write_Byte(I2C_ChannelType channel,uint8 data){
 	switch(channel){
 	case I2C_0:
+		I2C0_C1 |=I2C_C1_TX_MASK;
 		I2C0_D = data;
 		break;
 
 	case I2C_1:
+		I2C1_C1 |=I2C_C1_TX_MASK;
 		I2C1_D = data;
 		break;
 
 	case I2C_2:
+		I2C2_C1 |=I2C_C1_TX_MASK;
 		I2C2_D = data;
 		break;
 
@@ -307,16 +305,17 @@ uint8  I2C_read_Byte(I2C_ChannelType channel){
 void I2C_wait(I2C_ChannelType channel){
 	switch(channel){
 	case I2C_0:
-		while(I2C_busy(channel));
+		while(((I2C0_S & I2C_S_IICIF_MASK) == FALSE));
+		I2C0_S |= I2C_S_IICIF_MASK;
 		break;
 
 	case I2C_1:
-		while(I2C_busy(channel));
-		break;
+		while(((I2C1_S & I2C_S_IICIF_MASK) == FALSE));
+				I2C1_S |= I2C_S_IICIF_MASK;		break;
 
 	case I2C_2:
-		while(I2C_busy(channel));
-		break;
+		while(((I2C2_S & I2C_S_IICIF_MASK) == FALSE));
+				I2C2_S |= I2C_S_IICIF_MASK;		break;
 
 	default:
 		break;
@@ -409,8 +408,3 @@ void I2C_stop(I2C_ChannelType channel){
 		}
 
 }
-
-
-
-
-

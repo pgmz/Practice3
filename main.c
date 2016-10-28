@@ -46,7 +46,9 @@ int main(void)
     /* This for loop should be replaced. By default this loop allows a single stepping. */
     for (;;) {
         i++;
-        RTC_write(0x00, 0xAA);
+        //RTC_write(0, 9);
+        //RTC_read(0);
+        TERMHANDLER_upd();
     }
     /* Never leave main */
     return 0;
@@ -54,3 +56,4 @@ int main(void)
 ////////////////////////////////////////////////////////////////////////////////
 // EOF
 ////////////////////////////////////////////////////////////////////////////////
+

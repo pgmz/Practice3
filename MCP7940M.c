@@ -9,6 +9,7 @@
 #include "I2C.h"
 #include "GPIO.h"
 #include "UART.h"
+#include "DataTypeDefinitions.h"
 
 uint8 RTC_init(){
 	//I2C0, PB2 - SCL, PB3 - SDA
@@ -30,7 +31,7 @@ uint8 RTC_write(uint8 address, uint8 data){
 	I2C_wait(I2C_0);
 	I2C_get_ACK(I2C_0);
 
-	I2C_write_Byte(I2C_0, address);
+	I2C_write_Byte(I2C_0, data);
 	I2C_wait(I2C_0);
 	I2C_get_ACK(I2C_0);
 
@@ -40,19 +41,21 @@ uint8 RTC_write(uint8 address, uint8 data){
 }
 
 uint8 RTC_read(uint8 address){
-	static uint8 dataFromMCP7940M;
+	uint8 dataFromMCP7940M;
+	I2C_TX_RX_Mode(I2C_0, I2C_TX_MODE);
+
 	I2C_start(I2C_0);
 
-	I2C_write_Byte(CONTROL_W, I2C_0);
+	I2C_write_Byte(I2C_0, CONTROL_W);
 	I2C_wait(I2C_0);
 	I2C_get_ACK(I2C_0);
 
-	I2C_write_Byte(address, I2C_0);
+	I2C_write_Byte(I2C_0, address);
 	I2C_wait(I2C_0);
 	I2C_get_ACK(I2C_0);
 
 	I2C_repeted_Start(I2C_0);
-	I2C_write_Byte(CONTROL_R, I2C_0);
+	I2C_write_Byte(I2C_0, CONTROL_R);
 	I2C_wait(I2C_0);
 	I2C_get_ACK(I2C_0);
 
@@ -61,12 +64,12 @@ uint8 RTC_read(uint8 address){
 
 	I2C_NACK(I2C_0);
 	dataFromMCP7940M = I2C_read_Byte(I2C_0);
-	I2C_NACK(I2C_0);
+	I2C_wait(I2C_0);
 
 	I2C_stop(I2C_0);
 	dataFromMCP7940M = I2C_read_Byte(I2C_0);
 
-	return dataFromMCP7940M;
+ 	return dataFromMCP7940M;
 }
 
 uint8 RTC_writeHour(RTC_ConfigType* config){
@@ -132,4 +135,3 @@ uint8 RTC_setAlarm1(RTC_ConfigType* alarm1){
 uint8 RTC_disableAlarm0();
 
 uint8 RTC_disableAlarm1();
-
