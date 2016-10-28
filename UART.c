@@ -28,6 +28,7 @@ void UART0_RX_TX_IRQHandler(){
 	while (!(UART0_S1 & UART_S1_RDRF_MASK));
 		UART0_MailBox.flag = TRUE;
 		UART0_MailBox.mailBox = UART0_D;
+		UART_putChar(UART_0, UART0_MailBox.mailBox);
 }
 
 
@@ -35,6 +36,7 @@ void UART1_RX_TX_IRQHandler(){
 	while (!(UART1_S1 & UART_S1_RDRF_MASK));
 		UART1_MailBox.flag = TRUE;
 		UART1_MailBox.mailBox = UART1_D;
+		UART_putChar(UART_1, UART1_MailBox.mailBox);
 }
 
 
@@ -42,6 +44,7 @@ void UART2_RX_TX_IRQHandler(){
 	while (!(UART2_S1 & UART_S1_RDRF_MASK));
 		UART2_MailBox.flag = TRUE;
 		UART2_MailBox.mailBox = UART2_D;
+		UART_putChar(UART_2, UART2_MailBox.mailBox);
 }
 
 
@@ -49,6 +52,7 @@ void UART3_RX_TX_IRQHandler(){
 	while (!(UART3_S1 & UART_S1_RDRF_MASK));
 		UART3_MailBox.flag = TRUE;
 		UART3_MailBox.mailBox = UART3_D;
+		UART_putChar(UART_3, UART3_MailBox.mailBox);
 }
 
 
@@ -56,12 +60,14 @@ void UART4_RX_TX_IRQHandler(){
 	while (!(UART4_S1 & UART_S1_RDRF_MASK));
 		UART4_MailBox.flag = TRUE;
 		UART4_MailBox.mailBox = UART4_D;
+		UART_putChar(UART_4, UART4_MailBox.mailBox);
 }
 
 void UART5_RX_TX_IRQHandler(){
 	while (!(UART5_S1 & UART_S1_RDRF_MASK));
 		UART5_MailBox.flag = TRUE;
 		UART5_MailBox.mailBox = UART5_D;
+		UART_putChar(UART_5, UART5_MailBox.mailBox);
 }
 
 //
