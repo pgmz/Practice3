@@ -34,7 +34,7 @@
 #include "MCP7940M.h"
 #include "TermHandler.h"
 #include "M24LC256.h"
-
+#include "GlobalFunctions.h"
 static int i = 0;
 
 int main(void)
@@ -43,19 +43,18 @@ int main(void)
     /* Write your code here */
 
 	//TERMHANDLER_init();
-	//RTC_init();
-    MEM_init();
+	RTC_init();
+    //MEM_init();
     /* This for loop should be replaced. By default this loop allows a single stepping. */
+	RTC_write(0,0x80);
+	//RTC_write();
     for (;;) {
-        i++;
-        //RTC_write(0, 6);
-//        MEM_read(1);
-  //      RTC_read(0);
 
-        MEM_write(5, 5);
-        MEM_write(1, 6);
-        MEM_read(5);
-        //TERMHANDLER_upd();
+       // RTC_write(0, 6);
+        i = RTC_read(0);
+        //MEM_write(i,5);
+        //delay(1000);
+
     }
     /* Never leave main */
     return 0;

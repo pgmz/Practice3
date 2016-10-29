@@ -11,12 +11,12 @@
 #include "DataTypeDefinitions.h"
 #include "I2C.h"
 
-#define A0 0
-#define A1 0
-#define A2 0
+//#define A0 0
+//#define A1 0
+//#define A2 0
 
-#define MEM_CONTROL_W 0xA0 | (A2 << 3) | (A1 << 2) | (A0 << 1)
-#define MEM_CONTROL_R 0xA1 | (A2 << 3) | (A1 << 2) | (A0 << 1)
+#define MEM_CONTROL_W 0xA0
+#define MEM_CONTROL_R 0xA1
 
 uint8 MEM_init();
 
