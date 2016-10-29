@@ -10,6 +10,7 @@
 #include "GPIO.h"
 #include "UART.h"
 #include "DataTypeDefinitions.h"
+#include "GlobalFunctions.h"
 
 uint8 RTC_init(){
 	//I2C0, PB2 - SCL, PB3 - SDA
@@ -42,8 +43,7 @@ uint8 RTC_write(uint8 address, uint8 data){
 
 uint8 RTC_read(uint8 address){
 	uint8 dataFromMCP7940M;
-	I2C_TX_RX_Mode(I2C_0, I2C_TX_MODE);
-
+	//I2C_TX_RX_Mode(I2C_0, I2C_TX_MODE);
 	I2C_start(I2C_0);
 
 	I2C_write_Byte(I2C_0, CONTROL_W);
@@ -62,9 +62,10 @@ uint8 RTC_read(uint8 address){
 	I2C_TX_RX_Mode(I2C_0, I2C_RX_MODE);
 
 
-	I2C_NACK(I2C_0);
 	dataFromMCP7940M = I2C_read_Byte(I2C_0);
 	I2C_wait(I2C_0);
+	I2C_TX_RX_Mode(I2C_0, I2C_TX_MODE);
+	I2C_NACK(I2C_0);
 
 	I2C_stop(I2C_0);
 	dataFromMCP7940M = I2C_read_Byte(I2C_0);

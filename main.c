@@ -33,6 +33,7 @@
 #include "MK64F12.h"
 #include "MCP7940M.h"
 #include "TermHandler.h"
+#include "M24LC256.h"
 
 static int i = 0;
 
@@ -41,14 +42,20 @@ int main(void)
 
     /* Write your code here */
 
-	TERMHANDLER_init();
-	RTC_init();
+	//TERMHANDLER_init();
+	//RTC_init();
+    MEM_init();
     /* This for loop should be replaced. By default this loop allows a single stepping. */
     for (;;) {
         i++;
-        //RTC_write(0, 9);
-        //RTC_read(0);
-        TERMHANDLER_upd();
+        //RTC_write(0, 6);
+//        MEM_read(1);
+  //      RTC_read(0);
+
+        MEM_write(5, 5);
+        MEM_write(1, 6);
+        MEM_read(5);
+        //TERMHANDLER_upd();
     }
     /* Never leave main */
     return 0;
