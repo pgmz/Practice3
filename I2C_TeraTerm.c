@@ -8,7 +8,7 @@
 #include "TermHandler.h"
 #include "DataTypeDefinitions.h"
 #include "GlobalFunctions.h"
-
+#include "MCP7940M.h"
 
 
 uint16 expo(uint8 a,uint8 b){
@@ -40,6 +40,7 @@ uint16 Cast_Memory(uint8 memory[]){
 	}
 	return DataOut;
 }
+
 
 
 
