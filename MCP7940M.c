@@ -14,22 +14,8 @@
 
 uint8 Time_Char[]="00:00:00";
 
-RTC_ConfigType Struct_RTC = {
-		6,
-		41,
-		17,
-		22,
-		0,
-		18,
-		17,
-		16
-};
 
-RTC_CharArray Struct_Char = {
-		"00:00:00 AM",
-		"2000 00 00",
-		"Miercoles",
-};
+
 
 uint8 RTC_init(){
 	//I2C0, PB2 - SCL, PB3 - SDA
@@ -42,15 +28,15 @@ uint8 RTC_init(){
 
 
 
-void Cast_Seconds(){
-	uint8 units_seconds = Struct_RTC.second & 0x0F;
-	uint8 dozens_seconds = Struct_RTC.second >> 4;
-	Struct_Char.Time_Char[7] = (char)(units_seconds + 48);
-	Struct_Char.Time_Char[6] = (char)(dozens_seconds + 48);
+void Cast_Seconds(RTC_ConfigType* configRAW, RTC_CharArray* config){
+	uint8 units_seconds = configRAW->second & 0x0F;
+	uint8 dozens_seconds = configRAW->second >> 4;
+	config->Time_Char[7] = (char)(units_seconds + 48);
+	config->Time_Char[6] = (char)(dozens_seconds + 48);
 }
 
 void Cast_Minutes(){
-	uint8 units_minutes = Struct_RTC.minute & 0x0F;
+	uint8 units_minutes = configRAW.minute & 0x0F;
 	uint8 dozens_minutes = Struct_RTC.minute >> 4;
 	Struct_Char.Time_Char[4] = (char)(units_minutes + 48);
 	Struct_Char.Time_Char[3] = (char)(dozens_minutes + 48);
@@ -215,6 +201,8 @@ uint8 RTC_readDate(RTC_ConfigType* read){
 	read->date = RTC_read(RTCDATE);
 	read->month = RTC_read(RTCMTH);
 	read->year = RTC_read(RTCYEAR);
+
+
 
 	return TRUE;
 }

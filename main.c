@@ -42,17 +42,35 @@ int main(void)
 
     /* Write your code here */
 
-	//TERMHANDLER_init();
+	RTC_ConfigType Struct_RTC = {
+			6,
+			41,
+			17,
+			22,
+			0,
+			18,
+			17,
+			16
+	};
+
+	RTC_CharArray Struct_Char = {
+			"00:00:00 AM",
+			"2000 00 00",
+			"Miercoles",
+	};
+
+	TERMHANDLER_init();
 	RTC_init();
-    //MEM_init();
+    MEM_init();
     /* This for loop should be replaced. By default this loop allows a single stepping. */
 	RTC_write(0,0x80);
 	//RTC_write();
     for (;;) {
-
+    	i++;
        // RTC_write(0, 6);
-        i = RTC_read(0);
-        //MEM_write(i,5);
+        RTC_readHour(&RTC_ConfigType);
+        RTC_readDate(&RTC_ConfigType);
+
         //delay(1000);
 
     }

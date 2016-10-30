@@ -38,10 +38,10 @@ void I2C_init(I2C_ChannelType channel, uint32 systemClock, uint8 baudRate){
 	case I2C_0:
 		SIM->SCGC4 |= SIM_SCGC4_I2C0_MASK;
 		I2C0_F = 0x56;
-		//56 disque, 100k
-		//E disque, 400k
-		//8c disque, 9600
-		//14 sabe!!
+		//0x56 disque, 100k
+		//0xE disque, 400k
+		//0x8c disque, 9600
+		//0x14 sabe!!
 		I2C0_C1 |= I2C_C1_IICEN_MASK;
 		//I2C0_SMB |= I2C_SMB_FACK_MASK;
 		break;
@@ -371,7 +371,6 @@ uint16 I2C_get_ACK(I2C_ChannelType channel){
 void I2C_start(I2C_ChannelType channel){
 	switch(channel){
 	case I2C_0:
-		I2C0_C1 |= I2C_C1_IICEN_MASK;
 
 		//I2C0_C1 |= I2C_C1_TX_MASK;
 		I2C0_C1 |= I2C_C1_MST_MASK;
