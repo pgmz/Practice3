@@ -40,6 +40,10 @@
 #define ALM1DATE 0x15
 #define ALM1MTH 0x16
 
+#define LOW4 0x0F
+#define SHIFT4 4
+
+
 typedef struct{
 	uint8 weekday :3;
 	uint8 date :6;
@@ -50,6 +54,12 @@ typedef struct{
 	uint8 minute :7;
 	uint8 second :7;
 }RTC_ConfigType;
+
+typedef struct{
+	char Time_Char[11];
+	char Date_Char[10];
+	char WeekD_Char[10];
+}RTC_CharArray;
 
 
 uint8 RTC_init();

@@ -12,6 +12,25 @@
 #include "DataTypeDefinitions.h"
 #include "GlobalFunctions.h"
 
+uint8 Time_Char[]="00:00:00";
+
+RTC_ConfigType Struct_RTC = {
+		6,
+		41,
+		17,
+		22,
+		0,
+		18,
+		17,
+		16
+};
+
+RTC_CharArray Struct_Char = {
+		"00:00:00 AM",
+		"2000 00 00",
+		"Miercoles",
+};
+
 uint8 RTC_init(){
 	//I2C0, PB2 - SCL, PB3 - SDA
 	GPIO_clockGating(GPIOB);
@@ -19,8 +38,100 @@ uint8 RTC_init(){
 	GPIO_pinControlRegister(GPIOB, BIT2, &pinControlRegister);
 	GPIO_pinControlRegister(GPIOB, BIT3, &pinControlRegister);
 	I2C_init(I2C_0, SYSTEM_CLOCK, BD_9600);
-
 }
+
+
+
+void Cast_Seconds(){
+	uint8 units_seconds = Struct_RTC.second & 0x0F;
+	uint8 dozens_seconds = Struct_RTC.second >> 4;
+	Struct_Char.Time_Char[7] = (char)(units_seconds + 48);
+	Struct_Char.Time_Char[6] = (char)(dozens_seconds + 48);
+}
+
+void Cast_Minutes(){
+	uint8 units_minutes = Struct_RTC.minute & 0x0F;
+	uint8 dozens_minutes = Struct_RTC.minute >> 4;
+	Struct_Char.Time_Char[4] = (char)(units_minutes + 48);
+	Struct_Char.Time_Char[3] = (char)(dozens_minutes + 48);
+}
+
+void Cast_Hours(){
+	uint8 units_hours = Struct_RTC.hour & 0x0F;
+	uint8 dozens_hours = Struct_RTC.hour >> 4;
+	Struct_Char.Time_Char[1] = (char)(units_hours + 48);
+	Struct_Char.Time_Char[0] = (char)(dozens_hours + 48);
+}
+
+void Cast_Format(){
+	if(Struct_RTC.format){
+		Struct_Char.Time_Char[9] = 'A';
+	}else{
+		Struct_Char.Time_Char[9] = 'P';
+	}
+}
+
+void Cast_Year(){
+	uint8 units_year = Struct_RTC.year & 0x0F;
+	uint8 dozens_year = Struct_RTC.year >> 4;
+	Struct_Char.Date_Char[3] = (char)(units_year + 48);
+	Struct_Char.Date_Char[2] = (char)(dozens_year + 48);
+}
+
+void Cast_Month(){
+	uint8 units_month = Struct_RTC.month & 0x0F;
+	uint8 dozens_month = Struct_RTC.month >> 4;
+	Struct_Char.Date_Char[6] = (char)(units_month + 48);
+	Struct_Char.Date_Char[5] = (char)(dozens_month + 48);
+}
+
+void Cast_Day(){
+	uint8 units_days = Struct_RTC.date & 0x0F;
+	uint8 dozens_days = Struct_RTC.date >> 4;
+	Struct_Char.Date_Char[9] = (char)(units_days + 48);
+	Struct_Char.Date_Char[8] = (char)(dozens_days + 48);
+}
+
+/*void Cast_WeekDay(){
+	int WD = Struct_RTC.weekday & 0x07;
+	switch(WD){
+	case 1:
+		Struct_Char.WeekD_Char = "Lunes";
+		break;
+
+	case 2:
+		Struct_Char.WeekD_Char = "Martes";
+		break;
+
+	case 3:
+		Struct_Char.WeekD_Char = "Miercoles";
+		break;
+
+	case 4:
+		Struct_Char.WeekD_Char = "Jueves";
+		break;
+
+	case 5:
+		Struct_Char.WeekD_Char = "Viernes";
+		break;
+
+	case 6:
+		Struct_Char.WeekD_Char = "Sabado";
+		break;
+
+	case 7:
+		Struct_Char.WeekD_Char = "Domingo";
+		break;
+
+	default:
+		break;
+
+	}
+}*/
+
+
+
+
 
 uint8 RTC_write(uint8 address, uint8 data){
 	I2C_TX_RX_Mode(I2C_0, I2C_TX_MODE);
@@ -71,7 +182,7 @@ uint8 RTC_read(uint8 address){
 	I2C_stop(I2C_0);
 	dataFromMCP7940M = I2C_read_Byte(I2C_0);
 
- 	return dataFromMCP7940M;
+	return dataFromMCP7940M;
 }
 
 uint8 RTC_writeHour(RTC_ConfigType* config){
