@@ -20,9 +20,9 @@
 
 uint8 MEM_init();
 
-uint8 MEM_write(uint16 address, uint8 data);
+uint8 MEM_write(uint16 address, char data);
 
-uint8 MEM_read(uint16 address);
+char MEM_read(uint16 address);
 
 
 #endif /* SOURCES_M24LC256_H_ */

@@ -115,7 +115,7 @@ void TERM_upd(UART_ChannelType uartChannel, Term_StateMachineType* statemachine)
 
 					(*ftpr_Disp_Array[11])(uartChannel);
 					while(statemachine->len > 0){
-						UART_putString(uartChannel, MEM_read(statemachine->address));
+						UART_putChar(uartChannel, MEM_read(statemachine->address));
 						statemachine->len -= 1;
 						statemachine->address += 8;
 					}

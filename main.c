@@ -51,7 +51,7 @@ int main(void)
 	TERMHANDLER_init();
 
     /* This for loop should be replaced. By default this loop allows a single stepping. */
-	//RTC_write();
+	MEM_write(0x0,'5');
     for (;;) {
     	i++;
        // RTC_write(0, 6);
