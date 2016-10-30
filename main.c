@@ -42,22 +42,7 @@ int main(void)
 
     /* Write your code here */
 
-	RTC_ConfigType Struct_RTC = {
-			6,
-			41,
-			17,
-			22,
-			0,
-			18,
-			17,
-			16
-	};
 
-	RTC_CharArray Struct_Char = {
-			"00:00:00 AM",
-			"2000 00 00",
-			"Miercoles"
-	};
 
 	TERMHANDLER_init();
 	RTC_init();
@@ -68,9 +53,7 @@ int main(void)
     for (;;) {
     	i++;
        // RTC_write(0, 6);
-        RTC_readHour(&Struct_RTC);
-        RTC_readDate(&Struct_RTC);
-
+    	TERMHANDLER_upd();
 
 
         //delay(1000);

@@ -6,6 +6,7 @@
  */
 
 #include "TermHandler.h"
+#include "MCP7940M.h"
 
 ftpr_Disp ftpr_Disp_Array[16] = {
 		&TERM_menuDisp,
@@ -46,6 +47,24 @@ Term_StateMachineType Term2_StateMachine = {
 		0,
 		0,
 		24
+};
+
+RTC_ConfigType Struct_RTC = {
+		6,
+		41,
+		17,
+		22,
+		0,
+		18,
+		17,
+		16
+};
+
+RTC_CharArray Struct_Char = {
+		"00:00:00 AM",
+		"\0",
+		"2000/00/00",
+		"\0"
 };
 
 uint8 TERMHANDLER_init(){
@@ -189,6 +208,8 @@ void TERM_upd(UART_ChannelType uartChannel, Term_StateMachineType* statemachine)
 			UART_MailBoxData(uartChannel);
 			statemachine->currentMenuParameter = Option_param;
 			statemachine->currentMenu = MenuDisp;
+	        RTC_readHour(&Struct_RTC);
+	        Cast_Time(&Struct_RTC, &Struct_Char);
 			(*ftpr_Disp_Array[statemachine->currentMenu])(uartChannel);
 			break;
 
@@ -196,7 +217,9 @@ void TERM_upd(UART_ChannelType uartChannel, Term_StateMachineType* statemachine)
 			UART_MailBoxData(uartChannel);
 			statemachine->currentMenuParameter = Option_param;
 			statemachine->currentMenu = MenuDisp;
-			(*ftpr_Disp_Array[statemachine->currentMenu])(uartChannel);
+	        RTC_readDate(&Struct_RTC);
+	        Cast_Date(&Struct_RTC, &Struct_Char);
+			(*ftpr_Disp_Array[ReadDateDisp])(uartChannel);
 			break;
 
 		case CommunicationDisp:
@@ -256,10 +279,10 @@ void TERM_menuDisp(UART_ChannelType uartChannel){
 	UART_putString(uartChannel,"9) Eco en LCD\r\n");
 	UART_putString(uartChannel,"\r\n");
 	UART_putString(uartChannel,"La fecha actual es:\r\n");
-	//date
+	UART_putString(uartChannel, Struct_Char.Date_Char);
 	UART_putString(uartChannel,"\r\n");
 	UART_putString(uartChannel,"La hora actual es:\r\n");
-	//hour
+	UART_putString(uartChannel, Struct_Char.Time_Char);
 	UART_putString(uartChannel,"\r\n");
 }
 
@@ -358,7 +381,7 @@ void TERM_readHourDisp(UART_ChannelType uartChannel){
 	UART_putString(uartChannel,"***Comunicación por UART e I2C***\r\n");
 	UART_putString(uartChannel,"\r\n");
 	UART_putString(uartChannel,"Hora actual:\r\n");
-	//hora
+	UART_putString(uartChannel, Struct_Char.Time_Char);
 	UART_putString(uartChannel,"\r\n");
 
 }
@@ -369,7 +392,7 @@ void TERM_readDateDisp(UART_ChannelType uartChannel){
 	UART_putString(uartChannel,"***Comunicación por UART e I2C***\r\n");
 	UART_putString(uartChannel,"\r\n");
 	UART_putString(uartChannel,"Fecha actual:\r\n");
-	//fecha
+	UART_putString(uartChannel, Struct_Char.Date_Char);
 	UART_putString(uartChannel,"\r\n");
 
 }

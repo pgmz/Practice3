@@ -57,8 +57,9 @@ typedef struct{
 
 typedef struct{
 	char Time_Char[11];
+	char end2[2];
 	char Date_Char[10];
-	char WeekD_Char[10];
+	char end1[2];
 }RTC_CharArray;
 
 
@@ -84,19 +85,10 @@ uint8 RTC_disableAlarm0();
 
 uint8 RTC_disableAlarm1();
 
-void Cast_Seconds(RTC_ConfigType* configRAW, RTC_CharArray* config);
+void Cast_Time(RTC_ConfigType* configRAW, RTC_CharArray* config);
 
-void Cast_Minutes(RTC_ConfigType* configRAW, RTC_CharArray* config);
+void Cast_Date(RTC_ConfigType* configRAW, RTC_CharArray* config);
 
-void Cast_Hours(RTC_ConfigType* configRAW, RTC_CharArray* config);
-
-void Cast_Format(RTC_ConfigType* configRAW, RTC_CharArray* config);
-
-void Cast_Year(RTC_ConfigType* configRAW, RTC_CharArray* config);
-
-void Cast_Month(RTC_ConfigType* configRAW, RTC_CharArray* config);
-
-void Cast_Day(RTC_ConfigType* configRAW, RTC_CharArray* config);
 
 
 
