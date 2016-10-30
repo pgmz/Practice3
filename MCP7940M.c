@@ -28,56 +28,49 @@ uint8 RTC_init(){
 }
 
 
-
-void Cast_Seconds(RTC_ConfigType* configRAW, RTC_CharArray* config){
+void Cast_Time(RTC_ConfigType* configRAW, RTC_CharArray* config){
 	uint8 units_seconds = configRAW->second & 0x0F;
 	uint8 dozens_seconds = configRAW->second >> 4;
 	config->Time_Char[7] = (char)(units_seconds + 48);
 	config->Time_Char[6] = (char)(dozens_seconds + 48);
-}
 
-void Cast_Minutes(RTC_ConfigType* configRAW, RTC_CharArray* config){
 	uint8 units_minutes = configRAW->minute & 0x0F;
 	uint8 dozens_minutes = configRAW->minute >> 4;
 	config->Time_Char[4] = (char)(units_minutes + 48);
 	config->Time_Char[3] = (char)(dozens_minutes + 48);
-}
 
-void Cast_Hours(RTC_ConfigType* configRAW, RTC_CharArray* config){
 	uint8 units_hours = configRAW->hour& 0x0F;
 	uint8 dozens_hours = configRAW->hour >> 4;
 	config->Time_Char[1] = (char)(units_hours + 48);
 	config->Time_Char[0] = (char)(dozens_hours + 48);
-}
 
-void Cast_Format(RTC_ConfigType* configRAW, RTC_CharArray* config){
 	if(configRAW->format){
 		config->Time_Char[9] = 'A';
 	}else{
 		config->Time_Char[9] = 'P';
 	}
+
 }
 
-void Cast_Year(RTC_ConfigType* configRAW, RTC_CharArray* config){
+void Cast_Date(RTC_ConfigType* configRAW, RTC_CharArray* config){
 	uint8 units_year = configRAW->year & 0x0F;
 	uint8 dozens_year =configRAW->year >> 4;
 	config->Date_Char[3] = (char)(units_year + 48);
 	config->Date_Char[2] = (char)(dozens_year + 48);
-}
 
-void Cast_Month(RTC_ConfigType* configRAW, RTC_CharArray* config){
 	uint8 units_month = configRAW->month & 0x0F;
 	uint8 dozens_month = configRAW->month >> 4;
 	config->Date_Char[6] = (char)(units_month + 48);
 	config->Date_Char[5] = (char)(dozens_month + 48);
-}
 
-void Cast_Day(RTC_ConfigType* configRAW, RTC_CharArray* config){
 	uint8 units_days = configRAW->date & 0x0F;
 	uint8 dozens_days =configRAW->date >> 4;
 	config->Date_Char[9] = (char)(units_days + 48);
 	config->Date_Char[8] = (char)(dozens_days + 48);
 }
+
+
+
 
 uint8 RTC_write(uint8 address, uint8 data){
 	I2C_TX_RX_Mode(I2C_0, I2C_TX_MODE);
