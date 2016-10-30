@@ -1,3 +1,4 @@
+
 /*
  * MCP7940M.c
  *
@@ -78,47 +79,6 @@ void Cast_Day(RTC_ConfigType* configRAW, RTC_CharArray* config){
 	config->Date_Char[8] = (char)(dozens_days + 48);
 }
 
-void Cast_WeekDay(RTC_ConfigType* configRAW, RTC_CharArray* config){
-	int WD = Struct_RTC.weekday & 0x07;
-	switch(WD){
-	case 1:
-		config->WeekD_Char = "Lunes";
-		break;
-
-	case 2:
-		config->WeekD_Char = "Martes";
-		break;
-
-	case 3:
-		config->WeekD_Char ="Miercoles";
-		break;
-
-	case 4:
-		config->WeekD_Char = "Jueves";
-		break;
-
-	case 5:
-		config->WeekD_Char = "Viernes";
-		break;
-
-	case 6:
-		config->WeekD_Char = "Sabado";
-		break;
-
-	case 7:
-		config->WeekD_Char = "Domingo";
-		break;
-
-	default:
-		break;
-
-	}
-}
-
-
-
-
-
 uint8 RTC_write(uint8 address, uint8 data){
 	I2C_TX_RX_Mode(I2C_0, I2C_TX_MODE);
 	I2C_start(I2C_0);
@@ -173,36 +133,48 @@ uint8 RTC_read(uint8 address){
 
 uint8 RTC_writeHour(RTC_ConfigType* config){
 	RTC_write(RTCSEC, config->second);
+	delay(100);
 	RTC_write(RTCMIN, config->minute);
+	delay(100);
 	RTC_write(RTCHOUR, ((config->format << 6) || config->hour));
+	delay(100);
 
 	return TRUE;
 }
 
 uint8 RTC_writeDate(RTC_ConfigType* config){
 	RTC_write(RTCWKDAY, config->weekday);
+	delay(100);
 	RTC_write(RTCDATE, config->date);
+	delay(100);
 	RTC_write(RTCMTH, config->month);
+	delay(100);
 	RTC_write(RTCYEAR, config->year);
+	delay(100);
 
 	return TRUE;
 }
 
 uint8 RTC_readHour(RTC_ConfigType* read){
 	read->second = RTC_read(RTCSEC);
+	delay(100);
 	read->minute = RTC_read(RTCMIN);
+	delay(100);
 	read->hour = RTC_read(RTCHOUR);
+	delay(100);
 
 	return TRUE;
 }
 
 uint8 RTC_readDate(RTC_ConfigType* read){
 	read->weekday = RTC_read(RTCWKDAY);
+	delay(100);
 	read->date = RTC_read(RTCDATE);
+	delay(100);
 	read->month = RTC_read(RTCMTH);
+	delay(100);
 	read->year = RTC_read(RTCYEAR);
-
-
+	delay(100);
 
 	return TRUE;
 }
