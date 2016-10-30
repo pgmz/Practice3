@@ -44,17 +44,22 @@ int main(void)
 
 
 
-	TERMHANDLER_init();
 	RTC_init();
-    MEM_init();
-    /* This for loop should be replaced. By default this loop allows a single stepping. */
 	RTC_write(0,0x80);
+
+    MEM_init();
+	TERMHANDLER_init();
+
+    /* This for loop should be replaced. By default this loop allows a single stepping. */
 	//RTC_write();
     for (;;) {
     	i++;
        // RTC_write(0, 6);
     	TERMHANDLER_upd();
 
+    	//delay(100);
+    	//i = MEM_read(1);
+    	//delay(100);
 
         //delay(1000);
 

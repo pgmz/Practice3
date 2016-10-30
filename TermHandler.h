@@ -12,6 +12,7 @@
 #include "UART.h"
 #include "GPIO.h"
 #include "NVIC.h"
+#include "FIFO.h"
 
 //#define SYSTEM_CLOCK 110000000
 #define SYSTEM_CLOCK 21000000
@@ -47,6 +48,7 @@ typedef struct{
 	uint32 len;
 	uint32 tempdata;
 	uint32 shift_counter;
+	FIFO_Type f;
 }Term_StateMachineType;
 
 
@@ -66,29 +68,4 @@ void TERMHANDLER_upd();
 
 void TERM2_display();
 
-void TERM_menuDisp(UART_ChannelType uartChannel);
-
-void TERM_readI2CDisp1(UART_ChannelType uartChannel);
-void TERM_readI2CDisp2(UART_ChannelType uartChannel);
-void TERM_readI2CDisp3(UART_ChannelType uartChannel);
-
-void TERM_writeI2CDisp1(UART_ChannelType uartChannel);
-void TERM_writeI2CDisp2(UART_ChannelType uartChannel);
-void TERM_writeI2CDisp3(UART_ChannelType uartChannel);
-
-void TERM_setHourDisp1(UART_ChannelType uartChannel);
-void TERM_setHourDisp2(UART_ChannelType uartChannel);
-
-void TERM_setDateDisp1(UART_ChannelType uartChannel);
-void TERM_setDateDisp2(UART_ChannelType uartChannel);
-
-void TERM_setHourFormatDisp(UART_ChannelType uartChannel);
-
-void TERM_readHourDisp(UART_ChannelType uartChannel);
-
-void TERM_readDateDisp(UART_ChannelType uartChannel);
-
-void TERM_communicationDisp(UART_ChannelType uartChannel);
-
-void TERM_lcdDisp(UART_ChannelType uartChannel);
 #endif /* SOURCES_TERMHANDLER_H_ */

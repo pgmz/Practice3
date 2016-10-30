@@ -30,7 +30,7 @@ uint8 RTC_init(){
 
 void Cast_Time(RTC_ConfigType* configRAW, RTC_CharArray* config){
 	uint8 units_seconds = configRAW->second & 0x0F;
-	uint8 dozens_seconds = configRAW->second >> 4;
+	uint8 dozens_seconds = (configRAW->second >> 4) & (0x7);
 	config->Time_Char[7] = (char)(units_seconds + 48);
 	config->Time_Char[6] = (char)(dozens_seconds + 48);
 
