@@ -28,6 +28,7 @@ RTC_CharArray Struct_Char = {
 };
 
 void TERM_menuDisp(UART_ChannelType uartChannel){
+	UART_putString(uartChannel,"\033[0;30;47m");
 	UART_putString(uartChannel,"\033[2J");
 	UART_putString(uartChannel,"\033[H");
 	UART_putString(uartChannel,"***Comunicación por UART e I2C***\r\n");
@@ -150,8 +151,10 @@ void TERM_readHourDisp(UART_ChannelType uartChannel){
 	UART_putString(uartChannel,"***Comunicación por UART e I2C***\r\n");
 	UART_putString(uartChannel,"\r\n");
 	UART_putString(uartChannel,"Hora actual:\r\n");
+    RTC_readHour(&Struct_RTC);
+    Cast_Time(&Struct_RTC, &Struct_Char);
 	UART_putString(uartChannel, Struct_Char.Time_Char);
-	UART_putString(UART_0, "\r\n... Presione cualquier tecla para continuar... \r\n");
+	UART_putString(uartChannel,"\r\n");
 
 }
 
@@ -161,9 +164,10 @@ void TERM_readDateDisp(UART_ChannelType uartChannel){
 	UART_putString(uartChannel,"***Comunicación por UART e I2C***\r\n");
 	UART_putString(uartChannel,"\r\n");
 	UART_putString(uartChannel,"Fecha actual:\r\n");
+    RTC_readDate(&Struct_RTC);
+    Cast_Date(&Struct_RTC, &Struct_Char);
 	UART_putString(uartChannel, Struct_Char.Date_Char);
-	UART_putString(UART_0, "\r\n... Presione cualquier tecla para continuar... \r\n");
-
+	UART_putString(uartChannel,"\r\n");
 
 }
 
@@ -187,9 +191,3 @@ void TERM_lcdDisp(UART_ChannelType uartChannel){
 
 }
 
-void RTC_newRead(){
-    RTC_readHour(&Struct_RTC);
-    RTC_readDate(&Struct_RTC);
-    Cast_Time(&Struct_RTC, &Struct_Char);
-    Cast_Date(&Struct_RTC, &Struct_Char);
-}

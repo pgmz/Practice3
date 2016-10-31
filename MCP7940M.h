@@ -62,6 +62,15 @@ typedef struct{
 	char end1[2];
 }RTC_CharArray;
 
+typedef struct{
+	uint8 Byte_One;
+	uint8 Byte_Two;
+	uint8 Byte_Three;
+	uint8 Byte_Four;
+	uint8 Byte_Five;
+	uint8 Byte_Six;
+}RTC_Address_Input;
+
 
 uint8 RTC_init();
 

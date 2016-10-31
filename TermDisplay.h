@@ -34,6 +34,4 @@ void TERM_communicationDisp(UART_ChannelType uartChannel);
 
 void TERM_lcdDisp(UART_ChannelType uartChannel);
 
-void RTC_newRead();
-
 #endif /* SOURCES_TERMDISPLAY_H_ */

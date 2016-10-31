@@ -13,10 +13,18 @@
 #include "DataTypeDefinitions.h"
 #include "GlobalFunctions.h"
 
-uint8 Time_Char[]="00:00:00";
 
 
+/*RTC_Address_Input AddressInput = {
+		0,
+		0,
+		0,
+		0,
+		0,
+		0
+};*/
 
+uint8 AddressInput[]="0x0000";
 
 uint8 RTC_init(){
 	//I2C0, PB2 - SCL, PB3 - SDA
@@ -52,6 +60,93 @@ void Cast_Time(RTC_ConfigType* configRAW, RTC_CharArray* config){
 
 }
 
+uint16 expo(uint8 a,uint8 b){
+	uint16 dataout = 1;
+	int i;
+	if(b == 0){
+		dataout = 1;
+	}else{
+		for(i = 0;i<b;i++){
+			dataout = dataout*a;
+		}
+	}
+	return dataout;
+}
+
+uint16 Cast_Memory(uint8 memory[]){
+	uint16 DataOut = 0;
+	int i;
+	int j = 0;
+	for(i = 5;i>1;i--){
+		if(memory[i] >= 65){
+			DataOut += (int)((memory[i]-55)*(expo(16,j)));
+			j++;
+		}
+		else{
+			DataOut += (int)((memory[i]-48)*(expo(16,j)));
+			j++;
+		}
+	}
+	return DataOut;
+}
+
+void Read_Memory(){
+
+
+}
+/*
+uint16 Read_Address(){
+	uint16 DataOut;
+	I2C_TX_RX_Mode(I2C_0, I2C_RX_MODE);
+	I2C_NACK(I2C_0);
+	AddressInput.Byte_One = I2C_read_Byte(I2C_0);
+	I2C_wait(I2C_0);
+	I2C_NACK(I2C_0);
+	AddressInput.Byte_Two = I2C_read_Byte(I2C_0);
+	I2C_wait(I2C_0);
+	I2C_NACK(I2C_0);
+	AddressInput.Byte_Three = I2C_read_Byte(I2C_0);
+	I2C_wait(I2C_0);
+	I2C_NACK(I2C_0);
+	AddressInput.Byte_Four = I2C_read_Byte(I2C_0);
+	I2C_wait(I2C_0);
+	I2C_NACK(I2C_0);
+	AddressInput.Byte_Five = I2C_read_Byte(I2C_0);
+	I2C_wait(I2C_0);
+	I2C_NACK(I2C_0);
+	AddressInput.Byte_Six = I2C_read_Byte(I2C_0);
+	I2C_stop(I2C_0);
+	DataOut = Cast_Memory(AddressInput);
+	return DataOut;
+}*/
+
+uint16 Read_Address(){
+	uint16 DataOut;
+	I2C_TX_RX_Mode(I2C_0, I2C_RX_MODE);
+	I2C_NACK(I2C_0);
+	AddressInput[0] = I2C_read_Byte(I2C_0);
+	I2C_wait(I2C_0);
+	I2C_NACK(I2C_0);
+	AddressInput[1] = I2C_read_Byte(I2C_0);
+	I2C_wait(I2C_0);
+	I2C_NACK(I2C_0);
+	AddressInput[2] = I2C_read_Byte(I2C_0);
+	I2C_wait(I2C_0);
+	I2C_NACK(I2C_0);
+	AddressInput[3] = I2C_read_Byte(I2C_0);
+	I2C_wait(I2C_0);
+	I2C_NACK(I2C_0);
+	AddressInput[4] = I2C_read_Byte(I2C_0);
+	I2C_wait(I2C_0);
+	I2C_NACK(I2C_0);
+	AddressInput[5] = I2C_read_Byte(I2C_0);
+	I2C_stop(I2C_0);
+	DataOut = Cast_Memory(AddressInput);
+	return DataOut;
+}
+
+
+
 void Cast_Date(RTC_ConfigType* configRAW, RTC_CharArray* config){
 	uint8 units_year = configRAW->year & 0x0F;
 	uint8 dozens_year =configRAW->year >> 4;
@@ -68,7 +163,6 @@ void Cast_Date(RTC_ConfigType* configRAW, RTC_CharArray* config){
 	config->Date_Char[9] = (char)(units_days + 48);
 	config->Date_Char[8] = (char)(dozens_days + 48);
 }
-
 
 
 
@@ -91,6 +185,8 @@ uint8 RTC_write(uint8 address, uint8 data){
 
 	return TRUE;
 }
+
+
 
 uint8 RTC_read(uint8 address){
 	uint8 dataFromMCP7940M;
