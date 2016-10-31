@@ -69,10 +69,8 @@ void Cast_Date(RTC_ConfigType* configRAW, RTC_CharArray* config){
 	config->Date_Char[8] = (char)(dozens_days + 48);
 }
 
-
-
-
 uint8 RTC_write(uint8 address, uint8 data){
+	while(I2C_busy(I2C_0) == TRUE);
 	I2C_TX_RX_Mode(I2C_0, I2C_TX_MODE);
 	I2C_start(I2C_0);
 	I2C_write_Byte(I2C_0, CONTROL_W);
@@ -93,6 +91,7 @@ uint8 RTC_write(uint8 address, uint8 data){
 }
 
 uint8 RTC_read(uint8 address){
+	while(I2C_busy(I2C_0) == TRUE);
 	uint8 dataFromMCP7940M;
 	I2C_TX_RX_Mode(I2C_0, I2C_TX_MODE);
 	I2C_start(I2C_0);

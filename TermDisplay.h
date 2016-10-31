@@ -27,8 +27,10 @@ void TERM_setDateDisp2(UART_ChannelType uartChannel);
 void TERM_setHourFormatDisp(UART_ChannelType uartChannel);
 
 void TERM_readHourDisp(UART_ChannelType uartChannel);
+void TERM_readHourDisp1(UART_ChannelType uartChannel);
 
 void TERM_readDateDisp(UART_ChannelType uartChannel);
+void TERM_readDateDisp1(UART_ChannelType uartChannel);
 
 void TERM_communicationDisp(UART_ChannelType uartChannel);
 

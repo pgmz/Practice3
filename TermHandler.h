@@ -45,10 +45,10 @@ typedef struct{
 	uint8 currentMenu :4;
 	uint8 currentMenuParameter;
 	uint16 address;
-	char char_address [6];
+	char char_address [4];
 	uint32 data;
 	uint32 len;
-	char char_len [8];
+	char char_len [2];
 	uint32 tempdata;
 	uint32 shift_counter;
 	FIFO_Type f;
@@ -85,7 +85,6 @@ void TERM_ReadDate(UART_ChannelType uartChannel, Term_StateMachineType* statemac
 void TERM_communication(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
 void TERM_LCD(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
 
-
-
+void Cast_Memory_param(Term_StateMachineType* statemachine);
 
 #endif /* SOURCES_TERMHANDLER_H_ */

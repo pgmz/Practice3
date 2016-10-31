@@ -22,6 +22,8 @@ uint8 MEM_init(){
 }
 
 uint8 MEM_write(uint16 address, char data){
+	while(I2C_busy(I2C_0) == TRUE);
+
 	uint8 h_address = 0x00FF & (address >> 8);
 	uint8 l_address = address;
 	I2C_TX_RX_Mode(I2C_0, I2C_TX_MODE);
@@ -48,6 +50,7 @@ uint8 MEM_write(uint16 address, char data){
 }
 
 char MEM_read(uint16 address){
+	while(I2C_busy(I2C_0) == TRUE);
 	uint8 h_address = (address >> 8);
 	uint8 l_address = address;
 	char dataFromM24LC256;

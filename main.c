@@ -35,6 +35,7 @@
 #include "TermHandler.h"
 #include "M24LC256.h"
 #include "GlobalFunctions.h"
+#include "UART.h"
 
 int main(void)
 {
@@ -44,11 +45,8 @@ int main(void)
 
 
 	RTC_init();
-	RTC_write(0,0x80);
     MEM_init();
 	TERMHANDLER_init();
-
-	MEM_write(0x0,'5');
     for (;;) {
     	TERM_upd();
     }

@@ -11,25 +11,28 @@
 #include "TermDisplay.h"
 #include "PIT.h"
 
-ftpr_Disp ftpr_Disp_Array[16] = {
-		&TERM_menuDisp,
-		&TERM_readI2CDisp1,
-		&TERM_writeI2CDisp1,
-		&TERM_setHourDisp1,
-		&TERM_setDateDisp1,
-		&TERM_setHourFormatDisp,
-		&TERM_readHourDisp,
-		&TERM_readDateDisp,
-		&TERM_communicationDisp,
-		&TERM_lcdDisp,
+ftpr_Disp ftpr_Disp_Array[18] = {
+		&TERM_menuDisp,			//0
+		&TERM_readI2CDisp1,		//1
+		&TERM_writeI2CDisp1,	//2
+		&TERM_setHourDisp1,		//3
+		&TERM_setDateDisp1,		//4
+		&TERM_setHourFormatDisp,//5
+		&TERM_readHourDisp,		//6
+		&TERM_readDateDisp,		//7
+		&TERM_communicationDisp,//8
+		&TERM_lcdDisp,			//9
 		////
 
-		&TERM_readI2CDisp2,
-		&TERM_readI2CDisp3,
-		&TERM_writeI2CDisp2,
-		&TERM_writeI2CDisp3,
-		&TERM_setHourDisp2,
-		&TERM_setDateDisp2
+		&TERM_readI2CDisp2,		//10
+		&TERM_readI2CDisp3,		//11
+		&TERM_writeI2CDisp2,	//12
+		&TERM_writeI2CDisp3,	//13
+		&TERM_setHourDisp2,		//14
+		&TERM_setDateDisp2,		//15
+
+		&TERM_readHourDisp1,	//16
+		&TERM_readDateDisp1,	//17
 		////
 };
 
@@ -51,10 +54,10 @@ Term_StateMachineType Term1_StateMachine = {
 		MenuDisp,
 		Option_param,
 		0x0,
-		"0x0000",
-		0,
-		0,
 		"0000",
+		0,
+		0,
+		"00",
 		0,
 		0,
 		{{},0,0}
@@ -65,10 +68,10 @@ Term_StateMachineType Term2_StateMachine = {
 		MenuDisp,
 		Option_param,
 		0x0,
-		"0x0000",
-		0,
-		0,
 		"0000",
+		0,
+		0,
+		"00",
 		0,
 		0,
 		{{},0,0}
@@ -79,7 +82,7 @@ TermHandler_StateMachineType TermHandler_StateMachine = {
 };
 
 uint8 TERMHANDLER_init(){
-	NVIC_enableInterruptAndPriority(PIT_CH0_IRQ, PRIORITY_8);
+	NVIC_enableInterruptAndPriority(PIT_CH0_IRQ, PRIORITY_11);
 	EnableInterrupts;
 
 
@@ -88,6 +91,7 @@ uint8 TERMHANDLER_init(){
 	PIT_delay(PIT_0,SYSTEM_CLOCK,2);
 	PIT_timerInterruptEnable(PIT_0);
 	PIT_timerEnable(PIT_0);
+	RTC_write(0,0x80);
 
 	TERM1_init();
 	TERM2_init();
@@ -95,129 +99,6 @@ uint8 TERMHANDLER_init(){
 	(*ftpr_Disp_Array[Term2_StateMachine.currentMenu])(UART_4);
 }
 
-void TERM_UGLY_upd(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
-	if(UART_MailBoxFlag(uartChannel)){
-		switch(statemachine->currentMenu){
-		case MenuDisp:
-
-
-			break;
-
-
-/////////////////////////////////////////////////////////////////////////////////
-			/////////////////////////////////////////////////////////////////////
-			/////////////////////////////////////////////////////////////////////
-		case ReadI2CDisp:
-
-			switch(statemachine->currentMenuParameter){
-			case Option_param:
-
-				statemachine->tempdata = ((UART_MailBoxData(uartChannel)))<<(statemachine->shift_counter*4);
-				statemachine->shift_counter++;
-				statemachine->currentMenuParameter = Address_param;
-				break;
-
-			case Address_param:
-				if(UART_MailBoxData(uartChannel) != 13 && (statemachine->shift_counter != 5) && UART_MailBoxData(uartChannel) != 10){
-
-					statemachine->tempdata = ((UART_MailBoxData(uartChannel))|(statemachine->tempdata)) << (statemachine->shift_counter*4);
-					statemachine->shift_counter++;
-
-				}
-				if((UART_MailBoxData(uartChannel) == 13) || (statemachine->shift_counter == -4) || (UART_MailBoxData(uartChannel) == 10)){
-
-					statemachine->address = statemachine->tempdata;
-					statemachine->tempdata = 0;
-					statemachine->shift_counter = 0;
-					statemachine->currentMenuParameter = Len_param;
-					(*ftpr_Disp_Array[10])(uartChannel);
-				}
-				break;
-
-			case Len_param:
-				if(UART_MailBoxData(uartChannel) != 13 && (statemachine->shift_counter != -4) && UART_MailBoxData(uartChannel) != 10){
-					statemachine->tempdata = ((UART_MailBoxData(uartChannel))|(statemachine->tempdata)) << (statemachine->shift_counter*4);
-					statemachine->shift_counter++;
-
-				}
-				if((UART_MailBoxData(uartChannel) == 13) || (statemachine->shift_counter == -4)|| (UART_MailBoxData(uartChannel) == 10)){
-					statemachine->len = statemachine->tempdata;
-					statemachine->shift_counter = 0;
-					statemachine->currentMenuParameter = Data_param;
-
-					(*ftpr_Disp_Array[11])(uartChannel);
-					while(statemachine->len > 0){
-						UART_putChar(uartChannel, MEM_read(statemachine->address));
-						statemachine->len -= 1;
-						statemachine->address += 8;
-					}
-				}
-
-				break;
-
-			case Data_param:
-				UART_MailBoxData(uartChannel);
-				statemachine->currentMenuParameter = Option_param;
-				statemachine->currentMenu = MenuDisp;
-				(*ftpr_Disp_Array[statemachine->currentMenu])(uartChannel);
-
-			}
-			break;
-
-		case WriteI2CDisp:
-
-			switch(statemachine->currentMenuParameter){
-			case Option_param:
-				statemachine->tempdata = ((UART_MailBoxData(UART_0)) - '0')<<(statemachine->shift_counter);
-				statemachine->shift_counter -= 4;
-				statemachine->currentMenuParameter = Address_param;
-				break;
-
-			case Address_param:
-				if(UART_MailBoxData(uartChannel) != 13 && (statemachine->shift_counter != -4)&& UART_MailBoxData(uartChannel) != 10){
-
-					statemachine->tempdata |= ((UART_MailBoxData(uartChannel)) - '0')<<(statemachine->shift_counter);
-					statemachine->shift_counter -= 4;
-
-				}
-				if((UART_MailBoxData(uartChannel) == 13) || (statemachine->shift_counter == -4)|| (UART_MailBoxData(uartChannel) == 10)){
-
-					statemachine->address = statemachine->tempdata;
-					statemachine->shift_counter = 24;
-					statemachine->currentMenuParameter = Data_param;
-
-					(*ftpr_Disp_Array[12])(uartChannel);
-				}
-				break;
-
-			case Data_param:
-				if(UART_MailBoxData(uartChannel) != 13 && (statemachine->shift_counter != -4)&& UART_MailBoxData(uartChannel) != 10){
-					statemachine->tempdata |= ((UART_MailBoxData(uartChannel)) - '0')<<(statemachine->shift_counter);
-					statemachine->shift_counter -= 4;
-
-				}
-				if((UART_MailBoxData(uartChannel) == 13) || (statemachine->shift_counter == -4)|| (UART_MailBoxData(uartChannel) == 10)){
-					statemachine->data = statemachine->tempdata;
-					statemachine->shift_counter = 24;
-					statemachine->currentMenuParameter = Len_param;
-
-					(*ftpr_Disp_Array[13])(uartChannel);
-					//////Make I2C linking
-				}
-
-				break;
-
-			case Len_param:
-				UART_MailBoxData(uartChannel);
-				statemachine->currentMenuParameter = Option_param;
-				statemachine->currentMenu = MenuDisp;
-				(*ftpr_Disp_Array[statemachine->currentMenu])(uartChannel);
-
-			}
-			break;
-}
-	}
-}
 
 uint8 TERM_upd(){
 	if(UART_MailBoxFlag(UART_0)){
@@ -228,22 +109,126 @@ uint8 TERM_upd(){
 	}
 	if(PIT_mailBoxFlag(PIT_0) == TRUE){
 		RTC_newRead();
-		if((Term1_StateMachine.currentMenu == MenuDisp) ||
-				(Term1_StateMachine.currentMenu == ReadHourDisp) || (Term1_StateMachine.currentMenu == ReadDateDisp)){
-			(*ftpr_Disp_Array[Term1_StateMachine.currentMenu])(UART_0);
+		if((Term1_StateMachine.currentMenu == ReadHourDisp)){
+			(*ftpr_Disp_Array[16])(UART_0);
+		} else if((Term1_StateMachine.currentMenu == ReadDateDisp)){
+			(*ftpr_Disp_Array[17])(UART_0);
 		}
-		if((Term2_StateMachine.currentMenu == MenuDisp) ||
-				(Term2_StateMachine.currentMenu == ReadHourDisp) || (Term2_StateMachine.currentMenu == ReadDateDisp)){
-			(*ftpr_Disp_Array[Term2_StateMachine.currentMenu])(UART_4);
+		if((Term2_StateMachine.currentMenu == ReadHourDisp)){
+			(*ftpr_Disp_Array[16])(UART_4);
+		} else if((Term2_StateMachine.currentMenu == ReadDateDisp)){
+			(*ftpr_Disp_Array[17])(UART_4);
 		}
 	}
 }
 
 void TERM_ReadMem(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
+	switch(statemachine->currentMenuParameter){
+	case Option_param:
 
+		statemachine->char_address[0] = (UART_MailBoxData(uartChannel));
+		statemachine->shift_counter++;
+		statemachine->currentMenuParameter = Address_param;
+		break;
+
+	case Address_param:
+		if(UART_MailBoxData(uartChannel) != 13 && (statemachine->shift_counter != 4) && UART_MailBoxData(uartChannel) != 10){
+
+			statemachine->char_address[statemachine->shift_counter] = (UART_MailBoxData(uartChannel));
+			statemachine->shift_counter++;
+
+		}
+		if((UART_MailBoxData(uartChannel) == 13) || (statemachine->shift_counter == 4) || (UART_MailBoxData(uartChannel) == 10)){
+			statemachine->shift_counter = 0;
+			statemachine->currentMenuParameter = Len_param;
+			(*ftpr_Disp_Array[10])(uartChannel);
+		}
+		break;
+
+	case Len_param:
+		if(UART_MailBoxData(uartChannel) != 13 && (statemachine->shift_counter != 2) && UART_MailBoxData(uartChannel) != 10){
+			statemachine->char_len[statemachine->shift_counter] = (UART_MailBoxData(uartChannel));
+			statemachine->shift_counter++;
+
+		}
+		if((UART_MailBoxData(uartChannel) == 13) || (statemachine->shift_counter == 2)|| (UART_MailBoxData(uartChannel) == 10)){
+			statemachine->shift_counter = 0;
+			statemachine->currentMenuParameter = Data_param;
+
+			(*ftpr_Disp_Array[11])(uartChannel);
+
+			Cast_Memory_param(statemachine);
+
+			while(statemachine->len > 0){
+				UART_putChar(uartChannel, MEM_read(statemachine->address));
+				statemachine->len -= 1;
+				statemachine->address += 8;
+			}
+
+			statemachine->address = 0;
+			UART_putString(uartChannel, "\r\nPresione cualquier tecla para continuar... ");
+		}
+
+		break;
+
+	case Data_param:
+		UART_MailBoxData(uartChannel);
+		statemachine->currentMenuParameter = Option_param;
+		statemachine->currentMenu = MenuDisp;
+		(*ftpr_Disp_Array[statemachine->currentMenu])(uartChannel);
+
+		break;
+	}
 }
 void TERM_WriteMem(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
 
+	switch(statemachine->currentMenuParameter){
+	case Option_param:
+
+		statemachine->char_address[0] = (UART_MailBoxData(uartChannel));
+		statemachine->shift_counter++;
+		statemachine->currentMenuParameter = Address_param;
+		break;
+
+	case Address_param:
+		if(UART_MailBoxData(uartChannel) != 13 && (statemachine->shift_counter != 4) && UART_MailBoxData(uartChannel) != 10){
+
+			statemachine->char_address[statemachine->shift_counter] = (UART_MailBoxData(uartChannel));
+			statemachine->shift_counter++;
+
+		}
+		if((UART_MailBoxData(uartChannel) == 13) || (statemachine->shift_counter == 4) || (UART_MailBoxData(uartChannel) == 10)){
+			statemachine->shift_counter = 0;
+			statemachine->currentMenuParameter = Data_param;
+			(*ftpr_Disp_Array[12])(uartChannel);
+		}
+		break;
+
+	case Data_param:
+
+		if ((UART_MailBoxData(uartChannel) == 13)){
+			UART_putString(UART_0, "\r\nSu texto ha sido guardado!\r\nPresione cualquier tecla para continuar");
+			statemachine->currentMenuParameter = Len_param;
+			statemachine->address = 0;
+		//what if we receive any other type of data
+			} else {
+				////
+
+				if(statemachine->address < 0x7FFF){
+				MEM_write(statemachine->address, UART_MailBoxData(uartChannel));
+				statemachine->address += 8;
+				}
+			}
+
+		break;
+
+	case Len_param:
+		UART_MailBoxData(uartChannel);
+		statemachine->currentMenuParameter = Option_param;
+		statemachine->currentMenu = MenuDisp;
+		(*ftpr_Disp_Array[statemachine->currentMenu])(uartChannel);
+		break;
+	}
 }
 void TERM_WriteHour(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
 
@@ -330,6 +315,9 @@ void TERM_ReadDate(UART_ChannelType uartChannel, Term_StateMachineType* statemac
 	statemachine->currentMenuParameter = Option_param;
 	statemachine->currentMenu = MenuDisp;
 	(*ftpr_Disp_Array[ReadDateDisp])(uartChannel);
+	(*ftpr_Disp_Array[17])(uartChannel);
+	(*ftpr_Disp_Array[19])(uartChannel);
+
 }
 
 void TERM_ReadHour(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
@@ -337,6 +325,7 @@ void TERM_ReadHour(UART_ChannelType uartChannel, Term_StateMachineType* statemac
 	statemachine->currentMenuParameter = Option_param;
 	statemachine->currentMenu = MenuDisp;
 	(*ftpr_Disp_Array[statemachine->currentMenu])(uartChannel);
+
 
 }
 
@@ -398,8 +387,23 @@ uint8 TERM2_init(){
 	return TRUE;
 }
 
+void Cast_Memory_param(Term_StateMachineType* statemachine){
+	statemachine->address = 0;
+	for(uint8 i=0;i<4;i++){
+	statemachine->address |= ((((statemachine->char_address[i] - '0')>= 0) &&
+			((statemachine->char_address[i] - '0') <= 9))?
+					((statemachine->char_address[i] - '0'))
+					:((((statemachine->char_address[i] - 'A')>= 0xA) &&
+							((statemachine->char_address[i] - 'A') <= 0xF))?
+									((statemachine->char_address[i] - 'A')):(0))) << (3-i)*4;
 
+	}
 
-void Cast_Add_Len(){
+	statemachine->len = 0;
+	for(uint8 i=0;i<2;i++){
+		statemachine->len |= ((((statemachine->char_len[i] - '0')>= 0) &&
+				((statemachine->char_len[i] - '0') <= 9))?((statemachine->char_len[i] - '0')):(0)) << ((1-i)*4);
+	}
+
 
 }
