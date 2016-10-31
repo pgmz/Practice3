@@ -9,6 +9,7 @@
 #include "MCP7940M.h"
 #include "M24LC256.h"
 #include "TermDisplay.h"
+#include "PIT.h"
 
 ftpr_Disp ftpr_Disp_Array[16] = {
 		&TERM_menuDisp,
@@ -78,6 +79,16 @@ TermHandler_StateMachineType TermHandler_StateMachine = {
 };
 
 uint8 TERMHANDLER_init(){
+	NVIC_enableInterruptAndPriority(PIT_CH0_IRQ, PRIORITY_8);
+	EnableInterrupts;
+
+
+	PIT_clockGating();
+	PIT_enable();
+	PIT_delay(PIT_0,SYSTEM_CLOCK,2);
+	PIT_timerInterruptEnable(PIT_0);
+	PIT_timerEnable(PIT_0);
+
 	TERM1_init();
 	TERM2_init();
 	(*ftpr_Disp_Array[Term1_StateMachine.currentMenu])(UART_0);
@@ -215,6 +226,17 @@ uint8 TERM_upd(){
 	if(UART_MailBoxFlag(UART_4)){
 	(*ftpr_Update_Array[Term2_StateMachine.currentMenu])(UART_4, &Term2_StateMachine);
 	}
+	if(PIT_mailBoxFlag(PIT_0) == TRUE){
+		RTC_newRead();
+		if((Term1_StateMachine.currentMenu == MenuDisp) ||
+				(Term1_StateMachine.currentMenu == ReadHourDisp) || (Term1_StateMachine.currentMenu == ReadDateDisp)){
+			(*ftpr_Disp_Array[Term1_StateMachine.currentMenu])(UART_0);
+		}
+		if((Term2_StateMachine.currentMenu == MenuDisp) ||
+				(Term2_StateMachine.currentMenu == ReadHourDisp) || (Term2_StateMachine.currentMenu == ReadDateDisp)){
+			(*ftpr_Disp_Array[Term2_StateMachine.currentMenu])(UART_4);
+		}
+	}
 }
 
 void TERM_ReadMem(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
@@ -308,7 +330,6 @@ void TERM_ReadDate(UART_ChannelType uartChannel, Term_StateMachineType* statemac
 	statemachine->currentMenuParameter = Option_param;
 	statemachine->currentMenu = MenuDisp;
 	(*ftpr_Disp_Array[ReadDateDisp])(uartChannel);
-	UART_putString(UART_0, "\r\n... Presione cualquier tecla para continuar... \r\n");
 }
 
 void TERM_ReadHour(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
@@ -316,7 +337,6 @@ void TERM_ReadHour(UART_ChannelType uartChannel, Term_StateMachineType* statemac
 	statemachine->currentMenuParameter = Option_param;
 	statemachine->currentMenu = MenuDisp;
 	(*ftpr_Disp_Array[statemachine->currentMenu])(uartChannel);
-	UART_putString(UART_0, "\r\n... Presione cualquier tecla para continuar... \r\n");
 
 }
 
