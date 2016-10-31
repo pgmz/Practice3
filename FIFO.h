@@ -22,4 +22,5 @@ typedef struct {
 
 uint8 FIFO_PUSH(FIFO_Type* f, char data);
 uint8 FIFO_POP(FIFO_Type* f);
+uint8 FIFO_restart(FIFO_Type *f);
 #endif /* SOURCES_FIFO_H_ */

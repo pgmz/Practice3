@@ -17,11 +17,17 @@ uint8 FIFO_PUSH(FIFO_Type* f, char data){
 }
 
 uint8 FIFO_POP(FIFO_Type* f){
+	char data;
 	if(f->tail == f->head){
 		return FALSE;
 	} else {
-		f->tail--;
-		return f->buff[f->tail];
+		data = f->buff[f->head];
+		f->head++;
+		return data;
 	}
 }
 
+uint8 FIFO_restart(FIFO_Type *f){
+	f->head = 0;
+	f->tail = 0;
+}

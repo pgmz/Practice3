@@ -35,7 +35,6 @@
 #include "TermHandler.h"
 #include "M24LC256.h"
 #include "GlobalFunctions.h"
-static int i = 0;
 
 int main(void)
 {
@@ -46,23 +45,12 @@ int main(void)
 
 	RTC_init();
 	RTC_write(0,0x80);
-
     MEM_init();
 	TERMHANDLER_init();
 
-    /* This for loop should be replaced. By default this loop allows a single stepping. */
 	MEM_write(0x0,'5');
     for (;;) {
-    	i++;
-       // RTC_write(0, 6);
-    	TERMHANDLER_upd();
-
-    	//delay(100);
-    	//i = MEM_read(1);
-    	//delay(100);
-
-        //delay(1000);
-
+    	TERM_upd();
     }
     /* Never leave main */
     return 0;

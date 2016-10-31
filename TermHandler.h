@@ -41,16 +41,28 @@ typedef enum{
 typedef void (*ftpr_Disp)(UART_ChannelType);
 
 typedef struct{
+	char id;
 	uint8 currentMenu :4;
 	uint8 currentMenuParameter;
-	uint32 address;
+	uint16 address;
+	char char_address [6];
 	uint32 data;
 	uint32 len;
+	char char_len [8];
 	uint32 tempdata;
 	uint32 shift_counter;
 	FIFO_Type f;
 }Term_StateMachineType;
 
+typedef struct{
+	uint8 MemBusy :1;
+	uint8 RTCBusy :1;
+	uint8 Term1Com :1;
+	uint8 Term2Com :1;
+	uint8 LCDBusy :1;
+}TermHandler_StateMachineType;
+
+typedef void (*ftpr_Update)(UART_ChannelType, Term_StateMachineType*);
 
 uint8 TERMHANDLER_init();
 
@@ -58,14 +70,22 @@ uint8 TERM1_init();
 
 uint8 TERM2_init();
 
-void TERM_upd(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
+void TERM_UGLY_upd(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
 
-void TERM1_upd();
+uint8 TERM_upd();
 
-void TERM2_upd();
+void TERM_MenuDisp(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
+void TERM_ReadMem(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
+void TERM_WriteMem(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
+void TERM_WriteHour(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
+void TERM_WriteDate(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
+void TERM_WriteFormat(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
+void TERM_ReadHour(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
+void TERM_ReadDate(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
+void TERM_communication(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
+void TERM_LCD(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
 
-void TERMHANDLER_upd();
 
-void TERM2_display();
+
 
 #endif /* SOURCES_TERMHANDLER_H_ */
