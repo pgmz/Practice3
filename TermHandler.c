@@ -10,6 +10,7 @@
 #include "M24LC256.h"
 #include "TermDisplay.h"
 #include "PIT.h"
+#include "Disp.h"
 
 RTC_ConfigType Struct_RTC_W = {
 		6,
@@ -101,6 +102,7 @@ TermHandler_StateMachineType TermHandler_StateMachine = {
 
 
 uint8 TERM_upd(){
+
 	if(UART_MailBoxFlag(UART_0)){
 	(*ftpr_Update_Array[Term1_StateMachine.currentMenu])(UART_0, &Term1_StateMachine);
 	}
@@ -258,7 +260,7 @@ void TERM_WriteHour(UART_ChannelType uartChannel, Term_StateMachineType* statema
 		(*ftpr_Disp_Array[statemachine->currentMenu])(uartChannel);
 
 	}
-
+	Info_Display(Struct_Char_W);
 }
 
 void TERM_WriteDate(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
@@ -267,9 +269,27 @@ void TERM_WriteDate(UART_ChannelType uartChannel, Term_StateMachineType* statema
 void TERM_WriteFormat(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
 
 }
-void TERM_LCD(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
-
-}
+/*void TERM_LCD(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
+	if(UART_MailBoxFlag(UART_0)){
+		(*ftpr_Update_Array[Term1_StateMachine.currentMenu])(UART_0, &Term1_StateMachine);
+		}
+		if(UART_MailBoxFlag(UART_4)){
+		(*ftpr_Update_Array[Term2_StateMachine.currentMenu])(UART_4, &Term2_StateMachine);
+		}
+		if(PIT_mailBoxFlag(PIT_0) == TRUE){
+			RTC_newRead();
+			if((Term1_StateMachine.currentMenu == ReadHourDisp)){
+				(*ftpr_Disp_Array[16])(UART_0);
+			} else if((Term1_StateMachine.currentMenu == ReadDateDisp)){
+				(*ftpr_Disp_Array[17])(UART_0);
+			}
+			if((Term2_StateMachine.currentMenu == ReadHourDisp)){
+				(*ftpr_Disp_Array[16])(UART_4);
+			} else if((Term2_StateMachine.currentMenu == ReadDateDisp)){
+				(*ftpr_Disp_Array[17])(UART_4);
+			}
+		}
+}*/
 
 void TERM_communication(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
 

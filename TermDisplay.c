@@ -29,7 +29,6 @@ RTC_CharArray Struct_Char = {
 
 void TERM_menuDisp(UART_ChannelType uartChannel){
 	UART_putString(uartChannel,"\033[2J");
-	UART_putString(uartChannel,"\033[0;30;47m");
 	UART_putString(uartChannel,"\033[H");
 	UART_putString(uartChannel,"***Comunicación por UART e I2C***\r\n");
 	UART_putString(uartChannel,"\r\n");
