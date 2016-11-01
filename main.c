@@ -36,8 +36,6 @@
 #include "M24LC256.h"
 #include "GlobalFunctions.h"
 #include "UART.h"
-#include "LCDNokia5110.h"
-
 
 int main(void)
 {
@@ -49,7 +47,6 @@ int main(void)
 	RTC_init();
     MEM_init();
 	TERMHANDLER_init();
-	LCDNokia_init();
     for (;;) {
     	TERM_upd();
     }

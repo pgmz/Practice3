@@ -86,6 +86,5 @@ void TERM_communication(UART_ChannelType uartChannel, Term_StateMachineType* sta
 void TERM_LCD(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
 
 void Cast_Memory_param(Term_StateMachineType* statemachine);
-void Hour_Check();
 
 #endif /* SOURCES_TERMHANDLER_H_ */

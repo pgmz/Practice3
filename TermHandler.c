@@ -10,7 +10,6 @@
 #include "M24LC256.h"
 #include "TermDisplay.h"
 #include "PIT.h"
-#include "Disp.h"
 
 RTC_ConfigType Struct_RTC_W = {
 		6,
@@ -26,7 +25,7 @@ RTC_ConfigType Struct_RTC_W = {
 RTC_CharArray Struct_Char_W = {
 		"00:00:00 AM",
 		"\0",
-		"2000/01/01",
+		"01/01/2000",
 		"\0"
 };
 
@@ -102,7 +101,6 @@ TermHandler_StateMachineType TermHandler_StateMachine = {
 
 
 uint8 TERM_upd(){
-
 	if(UART_MailBoxFlag(UART_0)){
 	(*ftpr_Update_Array[Term1_StateMachine.currentMenu])(UART_0, &Term1_StateMachine);
 	}
@@ -246,7 +244,7 @@ void TERM_WriteHour(UART_ChannelType uartChannel, Term_StateMachineType* statema
 		UART_MailBoxData(uartChannel);
 		Struct_Char_W.Time_Char[2] = ':';
 		Struct_Char_W.Time_Char[5] = ':';
-		Hour_Check();
+		Hour_Check(&Struct_Char_W ,&Struct_RTC_W);
 		RTC_writeHour(&Struct_RTC_W);
 		(*ftpr_Disp_Array[14])(uartChannel);
 		statemachine->currentMenuParameter = Len_param;
@@ -259,37 +257,81 @@ void TERM_WriteHour(UART_ChannelType uartChannel, Term_StateMachineType* statema
 		statemachine->currentMenuParameter = Option_param;
 		(*ftpr_Disp_Array[statemachine->currentMenu])(uartChannel);
 
+	} else {
+		UART_putString(uartChannel, "\r\nSe ha excedido del numero de caracteres,\r\n");
+		UART_putString(uartChannel, "se ignorara el utimo caracter ... (Presione ENTER)");
 	}
-	Info_Display(Struct_Char_W);
 }
 
 void TERM_WriteDate(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
+	if(statemachine->shift_counter < 10){
+			Struct_Char_W.Date_Char[statemachine->shift_counter] =
+					(((UART_MailBoxData(uartChannel) - '0') >= 0)
+							&& ((UART_MailBoxData(uartChannel) - '0') <= 9) )?
+									((UART_MailBoxData(uartChannel))):((UART_MailBoxData(uartChannel) == '/')?
+											('/'):('1'));
+			statemachine->shift_counter++;
+
+		} else if((UART_MailBoxData(uartChannel) == 13) && (statemachine->shift_counter == 10)){
+			UART_MailBoxData(uartChannel);
+			Struct_Char_W.Date_Char[2] = '/';
+			Struct_Char_W.Date_Char[5] = '/';
+			Date_Check(&Struct_Char_W ,&Struct_RTC_W);
+			RTC_writeDate(&Struct_RTC_W);
+			(*ftpr_Disp_Array[15])(uartChannel);
+			statemachine->currentMenuParameter = Len_param;
+
+			return;
+		} else if(statemachine->currentMenuParameter == Len_param){
+			UART_MailBoxData(uartChannel);
+			statemachine->shift_counter = 0;
+			statemachine->currentMenu = MenuDisp;
+			statemachine->currentMenuParameter = Option_param;
+			(*ftpr_Disp_Array[statemachine->currentMenu])(uartChannel);
+
+		} else {
+			UART_putString(uartChannel, "\r\nSe ha excedido del numero de caracteres,\r\n");
+			UART_putString(uartChannel, "se ignorara el utimo caracter ... (Presione ENTER)");
+		}
 
 }
 void TERM_WriteFormat(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
+	if((UART_MailBoxData(uartChannel) == 13)){
+
+		statemachine->currentMenu = MenuDisp;
+		statemachine->currentMenuParameter = Option_param;
+		statemachine->shift_counter = 0;
+		(*ftpr_Disp_Array[statemachine->currentMenu])(uartChannel);
+
+	} else if(statemachine->shift_counter <= 1){
+		statemachine->char_len[statemachine->shift_counter] = (UART_MailBoxData(uartChannel));
+		statemachine->shift_counter++;
+
+	if(statemachine->shift_counter == 2){
+		if((((statemachine->char_len[0] == 'S'))&&((statemachine->char_len[1] == 'i')))
+				||(((statemachine->char_len[0] == 's'))&&((statemachine->char_len[1] == 'i')))
+				||(((statemachine->char_len[0] == 'S'))&&((statemachine->char_len[1] == 'I')))){
+
+
+			Struct_RTC_W.format = (Struct_RTC_W.format)?(FALSE):(TRUE);
+			RTC_changeFormat(Struct_RTC_W.format);
+			UART_putString(uartChannel, "\r\nSe ha cambiado el formato, presione ENTER para continuar... \r\n");
+
+
+		} else if((((statemachine->char_len[0] == 'N'))&&((statemachine->char_len[1] == 'o')))
+				||(((statemachine->char_len[0] == 'n'))&&((statemachine->char_len[1] == 'o')))
+				||(((statemachine->char_len[0] == 'N'))&&((statemachine->char_len[1] == 'O')))){
+
+			UART_putString(uartChannel, "\r\n No se ha cambiado el formato, presione ENTER para continuar... \r\n");
+
+		}
+
+		}
+	}
+}
+void TERM_LCD(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
 
 }
-/*void TERM_LCD(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
-	if(UART_MailBoxFlag(UART_0)){
-		(*ftpr_Update_Array[Term1_StateMachine.currentMenu])(UART_0, &Term1_StateMachine);
-		}
-		if(UART_MailBoxFlag(UART_4)){
-		(*ftpr_Update_Array[Term2_StateMachine.currentMenu])(UART_4, &Term2_StateMachine);
-		}
-		if(PIT_mailBoxFlag(PIT_0) == TRUE){
-			RTC_newRead();
-			if((Term1_StateMachine.currentMenu == ReadHourDisp)){
-				(*ftpr_Disp_Array[16])(UART_0);
-			} else if((Term1_StateMachine.currentMenu == ReadDateDisp)){
-				(*ftpr_Disp_Array[17])(UART_0);
-			}
-			if((Term2_StateMachine.currentMenu == ReadHourDisp)){
-				(*ftpr_Disp_Array[16])(UART_4);
-			} else if((Term2_StateMachine.currentMenu == ReadDateDisp)){
-				(*ftpr_Disp_Array[17])(UART_4);
-			}
-		}
-}*/
 
 void TERM_communication(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
 
@@ -362,9 +404,7 @@ void TERM_ReadDate(UART_ChannelType uartChannel, Term_StateMachineType* statemac
 	UART_MailBoxData(uartChannel);
 	statemachine->currentMenuParameter = Option_param;
 	statemachine->currentMenu = MenuDisp;
-	(*ftpr_Disp_Array[ReadDateDisp])(uartChannel);
-	(*ftpr_Disp_Array[17])(uartChannel);
-	(*ftpr_Disp_Array[19])(uartChannel);
+	(*ftpr_Disp_Array[MenuDisp])(uartChannel);
 
 }
 
@@ -456,18 +496,6 @@ void Cast_Memory_param(Term_StateMachineType* statemachine){
 
 }
 
-void Hour_Check(){
-
-	Struct_RTC_W.hour = ((Struct_Char_W.Time_Char[0] - '0') << 4) | ((Struct_Char_W.Time_Char[1] - '0'));
-	Struct_RTC_W.minute = ((Struct_Char_W.Time_Char[3] - '0') << 4) | ((Struct_Char_W.Time_Char[4] - '0'));
-	Struct_RTC_W.second = (((Struct_Char_W.Time_Char[6] - '0') << 4) | ((Struct_Char_W.Time_Char[7] - '0')) | 0x80);
-
-	if((Struct_RTC_W.hour >= 0x13) && (Struct_RTC_W.format == TRUE)){
-		Struct_RTC_W.hour = (Struct_RTC_W.hour - 0x12)|(0x40);
-	}
-
-
-}
 
 uint8 TERMHANDLER_init(){
 	NVIC_enableInterruptAndPriority(PIT_CH0_IRQ, PRIORITY_11);

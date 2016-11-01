@@ -13,7 +13,7 @@
 #include "DataTypeDefinitions.h"
 #include "GlobalFunctions.h"
 
-uint8 Time_Char[]="00:00:00";
+//uint8 Time_Char[]="00:00:00";
 
 uint8 RTC_init(){
 	//I2C0, PB2 - SCL, PB3 - SDA
@@ -63,20 +63,23 @@ void Cast_Time(RTC_ConfigType* configRAW, RTC_CharArray* config){
 }
 
 void Cast_Date(RTC_ConfigType* configRAW, RTC_CharArray* config){
+
+	//"01/01/2000",
+
 	uint8 units_year = configRAW->year & 0x0F;
 	uint8 dozens_year =configRAW->year >> 4;
-	config->Date_Char[3] = (char)(units_year + 48);
-	config->Date_Char[2] = (char)(dozens_year + 48);
+	config->Date_Char[9] = (char)(units_year + 48);
+	config->Date_Char[8] = (char)(dozens_year + 48);
 
 	uint8 units_month = configRAW->month & 0x0F;
-	uint8 dozens_month = configRAW->month >> 4;
-	config->Date_Char[6] = (char)(units_month + 48);
-	config->Date_Char[5] = (char)(dozens_month + 48);
+	uint8 dozens_month = (configRAW->month >> 4) & ~0x2;
+	config->Date_Char[4] = (char)(units_month + 48);
+	config->Date_Char[3] = (char)(dozens_month + 48);
 
 	uint8 units_days = configRAW->date & 0x0F;
 	uint8 dozens_days =configRAW->date >> 4;
-	config->Date_Char[9] = (char)(units_days + 48);
-	config->Date_Char[8] = (char)(dozens_days + 48);
+	config->Date_Char[1] = (char)(units_days + 48);
+	config->Date_Char[0] = (char)(dozens_days + 48);
 }
 
 uint8 RTC_write(uint8 address, uint8 data){

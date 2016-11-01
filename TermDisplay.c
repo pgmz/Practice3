@@ -23,12 +23,13 @@ RTC_ConfigType Struct_RTC = {
 RTC_CharArray Struct_Char = {
 		"00:00:00 AM",
 		"\0",
-		"2000/01/01",
+		"01/01/2000",
 		"\0"
 };
 
 void TERM_menuDisp(UART_ChannelType uartChannel){
 	UART_putString(uartChannel,"\033[2J");
+	UART_putString(uartChannel,"\033[0;30;47m");
 	UART_putString(uartChannel,"\033[H");
 	UART_putString(uartChannel,"***Comunicación por UART e I2C***\r\n");
 	UART_putString(uartChannel,"\r\n");
@@ -140,6 +141,13 @@ void TERM_setHourFormatDisp(UART_ChannelType uartChannel){
 	UART_putString(uartChannel,"\r\n");
 	UART_putString(uartChannel,"Establecer formato de hora\r\n");
 	UART_putString(uartChannel,"\r\n");
+	if(Struct_RTC.format == TRUE){
+		UART_putString(uartChannel,"El formato actual es de 12 horas\r\n");
+		UART_putString(uartChannel,"Cambiar a formato de 24 horas? Si/No \r\n");
+	} else if(Struct_RTC.format == FALSE){
+		UART_putString(uartChannel,"El formato actual es de 24 horas\r\n");
+		UART_putString(uartChannel,"Cambiar a formato de 12 horas? Si/No \r\n");
+	}
 
 }
 
@@ -204,4 +212,44 @@ void RTC_newRead(){
     RTC_readDate(&Struct_RTC);
     Cast_Time(&Struct_RTC, &Struct_Char);
     Cast_Date(&Struct_RTC, &Struct_Char);
+}
+
+void RTC_changeFormat(uint8 format){
+    RTC_readHour(&Struct_RTC);
+	Struct_RTC.format = format;
+    RTC_writeHour(&Struct_RTC);
+
+}
+
+void Date_Check(RTC_CharArray* struct_char ,RTC_ConfigType* struct_config){
+	//		"01/01/2000",
+
+	Struct_Char.Date_Char[6] = struct_char->Date_Char[6];
+	Struct_Char.Date_Char[7] = struct_char->Date_Char[7];
+
+	struct_config->year = ((struct_char->Date_Char[8] - '0') << 4) | ((struct_char->Date_Char[9] - '0'));
+	struct_config->month = ((struct_char->Date_Char[3] - '0') << 4) | ((struct_char->Date_Char[4] - '0'));
+	struct_config->date = (((struct_char->Date_Char[0] - '0') << 4) | ((struct_char->Date_Char[1] - '0')));
+
+	if((struct_config->month <= 0) && (struct_config->month >= 13)){
+		struct_config->month = 1;
+	}
+
+	if((struct_config->date <= 0) && (struct_config->date >= 32)){
+		struct_config->month = 1;
+	}
+
+}
+
+void Hour_Check(RTC_CharArray* struct_char ,RTC_ConfigType* struct_config){
+
+	struct_config->hour = ((struct_char->Time_Char[0] - '0') << 4) | ((struct_char->Time_Char[1] - '0'));
+	struct_config->minute = ((struct_char->Time_Char[3] - '0') << 4) | ((struct_char->Time_Char[4] - '0'));
+	struct_config->second = (((struct_char->Time_Char[6] - '0') << 4) | ((struct_char->Time_Char[7] - '0')) | 0x80);
+
+	if((struct_config->hour >= 0x13) && (struct_config->format == TRUE)){
+		struct_config->hour = (struct_config->hour - 0x12)|(0x40);
+	}
+
+
 }
