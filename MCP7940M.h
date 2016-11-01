@@ -50,9 +50,9 @@ typedef struct{
 	uint8 month :6;
 	uint8 year :8;
 	uint8 format :1;
-	uint8 hour :6;
+	uint8 hour :7;
 	uint8 minute :7;
-	uint8 second :7;
+	uint8 second :8;
 }RTC_ConfigType;
 
 typedef struct{

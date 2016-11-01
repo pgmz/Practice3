@@ -11,6 +11,24 @@
 #include "TermDisplay.h"
 #include "PIT.h"
 
+RTC_ConfigType Struct_RTC_W = {
+		6,
+		41,
+		17,
+		22,
+		1,
+		18,
+		17,
+		16
+};
+
+RTC_CharArray Struct_Char_W = {
+		"00:00:00 AM",
+		"\0",
+		"2000/01/01",
+		"\0"
+};
+
 ftpr_Disp ftpr_Disp_Array[18] = {
 		&TERM_menuDisp,			//0
 		&TERM_readI2CDisp1,		//1
@@ -78,26 +96,8 @@ Term_StateMachineType Term2_StateMachine = {
 };
 
 TermHandler_StateMachineType TermHandler_StateMachine = {
-		FALSE, FALSE, FALSE, FALSE, FALSE
+		FALSE, FALSE, FALSE, FALSE
 };
-
-uint8 TERMHANDLER_init(){
-	NVIC_enableInterruptAndPriority(PIT_CH0_IRQ, PRIORITY_11);
-	EnableInterrupts;
-
-
-	PIT_clockGating();
-	PIT_enable();
-	PIT_delay(PIT_0,SYSTEM_CLOCK,2);
-	PIT_timerInterruptEnable(PIT_0);
-	PIT_timerEnable(PIT_0);
-	RTC_write(0,0x80);
-
-	TERM1_init();
-	TERM2_init();
-	(*ftpr_Disp_Array[Term1_StateMachine.currentMenu])(UART_0);
-	(*ftpr_Disp_Array[Term2_StateMachine.currentMenu])(UART_4);
-}
 
 
 uint8 TERM_upd(){
@@ -132,13 +132,13 @@ void TERM_ReadMem(UART_ChannelType uartChannel, Term_StateMachineType* statemach
 		break;
 
 	case Address_param:
-		if(UART_MailBoxData(uartChannel) != 13 && (statemachine->shift_counter != 4) && UART_MailBoxData(uartChannel) != 10){
+		if(UART_MailBoxData(uartChannel) != 13 && (statemachine->shift_counter != 4)){
 
 			statemachine->char_address[statemachine->shift_counter] = (UART_MailBoxData(uartChannel));
 			statemachine->shift_counter++;
 
 		}
-		if((UART_MailBoxData(uartChannel) == 13) || (statemachine->shift_counter == 4) || (UART_MailBoxData(uartChannel) == 10)){
+		if((UART_MailBoxData(uartChannel) == 13) || (statemachine->shift_counter == 4)){
 			statemachine->shift_counter = 0;
 			statemachine->currentMenuParameter = Len_param;
 			(*ftpr_Disp_Array[10])(uartChannel);
@@ -146,12 +146,12 @@ void TERM_ReadMem(UART_ChannelType uartChannel, Term_StateMachineType* statemach
 		break;
 
 	case Len_param:
-		if(UART_MailBoxData(uartChannel) != 13 && (statemachine->shift_counter != 2) && UART_MailBoxData(uartChannel) != 10){
+		if(UART_MailBoxData(uartChannel) != 13 && (statemachine->shift_counter != 2)){
 			statemachine->char_len[statemachine->shift_counter] = (UART_MailBoxData(uartChannel));
 			statemachine->shift_counter++;
 
 		}
-		if((UART_MailBoxData(uartChannel) == 13) || (statemachine->shift_counter == 2)|| (UART_MailBoxData(uartChannel) == 10)){
+		if((UART_MailBoxData(uartChannel) == 13) || (statemachine->shift_counter == 2)){
 			statemachine->shift_counter = 0;
 			statemachine->currentMenuParameter = Data_param;
 
@@ -207,7 +207,8 @@ void TERM_WriteMem(UART_ChannelType uartChannel, Term_StateMachineType* statemac
 	case Data_param:
 
 		if ((UART_MailBoxData(uartChannel) == 13)){
-			UART_putString(UART_0, "\r\nSu texto ha sido guardado!\r\nPresione cualquier tecla para continuar");
+			UART_putString(uartChannel, "[Enter]");
+			UART_putString(uartChannel, "\r\nSu texto ha sido guardado!\r\nPresione cualquier tecla para continuar");
 			statemachine->currentMenuParameter = Len_param;
 			statemachine->address = 0;
 		//what if we receive any other type of data
@@ -230,9 +231,36 @@ void TERM_WriteMem(UART_ChannelType uartChannel, Term_StateMachineType* statemac
 		break;
 	}
 }
+
 void TERM_WriteHour(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
+	if(statemachine->shift_counter < 8){
+		Struct_Char_W.Time_Char[statemachine->shift_counter] =
+				(((UART_MailBoxData(uartChannel) - '0') >= 0)
+						&& ((UART_MailBoxData(uartChannel) - '0') <= 9) )?
+								((UART_MailBoxData(uartChannel))):((UART_MailBoxData(uartChannel) == ':')?
+										(':'):('1'));
+		statemachine->shift_counter++;
+	} else if((UART_MailBoxData(uartChannel) == 13) && (statemachine->shift_counter == 8)){
+		UART_MailBoxData(uartChannel);
+		Struct_Char_W.Time_Char[2] = ':';
+		Struct_Char_W.Time_Char[5] = ':';
+		Hour_Check();
+		RTC_writeHour(&Struct_RTC_W);
+		(*ftpr_Disp_Array[14])(uartChannel);
+		statemachine->currentMenuParameter = Len_param;
+
+		return;
+	} else if(statemachine->currentMenuParameter == Len_param){
+		UART_MailBoxData(uartChannel);
+		statemachine->shift_counter = 0;
+		statemachine->currentMenu = MenuDisp;
+		statemachine->currentMenuParameter = Option_param;
+		(*ftpr_Disp_Array[statemachine->currentMenu])(uartChannel);
+
+	}
 
 }
+
 void TERM_WriteDate(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
 
 }
@@ -406,4 +434,35 @@ void Cast_Memory_param(Term_StateMachineType* statemachine){
 	}
 
 
+}
+
+void Hour_Check(){
+
+	Struct_RTC_W.hour = ((Struct_Char_W.Time_Char[0] - '0') << 4) | ((Struct_Char_W.Time_Char[1] - '0'));
+	Struct_RTC_W.minute = ((Struct_Char_W.Time_Char[3] - '0') << 4) | ((Struct_Char_W.Time_Char[4] - '0'));
+	Struct_RTC_W.second = (((Struct_Char_W.Time_Char[6] - '0') << 4) | ((Struct_Char_W.Time_Char[7] - '0')) | 0x80);
+
+	if((Struct_RTC_W.hour >= 0x13) && (Struct_RTC_W.format == TRUE)){
+		Struct_RTC_W.hour = (Struct_RTC_W.hour - 0x12)|(0x40);
+	}
+
+
+}
+
+uint8 TERMHANDLER_init(){
+	NVIC_enableInterruptAndPriority(PIT_CH0_IRQ, PRIORITY_11);
+	EnableInterrupts;
+
+
+	PIT_clockGating();
+	PIT_enable();
+	PIT_delay(PIT_0,SYSTEM_CLOCK,2);
+	PIT_timerInterruptEnable(PIT_0);
+	PIT_timerEnable(PIT_0);
+	RTC_write(0,0x80);
+
+	TERM1_init();
+	TERM2_init();
+	(*ftpr_Disp_Array[Term1_StateMachine.currentMenu])(UART_0);
+	(*ftpr_Disp_Array[Term2_StateMachine.currentMenu])(UART_4);
 }

@@ -10,6 +10,7 @@
 #include "GPIO.h"
 #include "UART.h"
 #include "DataTypeDefinitions.h"
+#include "GlobalFunctions.h"
 
 uint8 MEM_init(){
 	//I2C0, PB2 - SCL, PB3 - SDA
@@ -45,6 +46,7 @@ uint8 MEM_write(uint16 address, char data){
 	I2C_get_ACK(I2C_0);
 
 	I2C_stop(I2C_0);
+	delay(100);
 
 	return TRUE;
 }

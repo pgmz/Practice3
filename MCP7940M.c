@@ -15,9 +15,6 @@
 
 uint8 Time_Char[]="00:00:00";
 
-
-
-
 uint8 RTC_init(){
 	//I2C0, PB2 - SCL, PB3 - SDA
 	GPIO_clockGating(GPIOB);
@@ -30,7 +27,7 @@ uint8 RTC_init(){
 
 void Cast_Time(RTC_ConfigType* configRAW, RTC_CharArray* config){
 	uint8 units_seconds = configRAW->second & 0x0F;
-	uint8 dozens_seconds = (configRAW->second >> 4) & (0x7);
+	uint8 dozens_seconds = ((configRAW->second >> 4) & (0x7));
 	config->Time_Char[7] = (char)(units_seconds + 48);
 	config->Time_Char[6] = (char)(dozens_seconds + 48);
 
@@ -40,15 +37,28 @@ void Cast_Time(RTC_ConfigType* configRAW, RTC_CharArray* config){
 	config->Time_Char[3] = (char)(dozens_minutes + 48);
 
 	uint8 units_hours = configRAW->hour& 0x0F;
-	uint8 dozens_hours = configRAW->hour >> 4;
+	uint8 dozens_hours = (configRAW->hour >> 4) & ~(0x4);
+
+	configRAW->format = (((configRAW->hour >> 4) & (0x4)) == FALSE)?(FALSE):(TRUE);
+
+	if(configRAW->format == TRUE){
+		if((dozens_hours & 0x2) == FALSE){
+				config->Time_Char[9] = 'P';
+				config->Time_Char[10] = 'M';
+			}else{
+				dozens_hours = dozens_hours & ~(0x2);
+				config->Time_Char[9] = 'A';
+				config->Time_Char[10] = 'M';
+
+			}
+	} else {
+		config->Time_Char[9] = ' ';
+		config->Time_Char[10] = ' ';
+	}
 	config->Time_Char[1] = (char)(units_hours + 48);
 	config->Time_Char[0] = (char)(dozens_hours + 48);
 
-	if(configRAW->format){
-		config->Time_Char[9] = 'A';
-	}else{
-		config->Time_Char[9] = 'P';
-	}
+
 
 }
 
@@ -124,11 +134,11 @@ uint8 RTC_read(uint8 address){
 }
 
 uint8 RTC_writeHour(RTC_ConfigType* config){
-	RTC_write(RTCSEC, config->second);
+	RTC_write(RTCHOUR, ((config->format << 6) | config->hour));
 	delay(100);
 	RTC_write(RTCMIN, config->minute);
 	delay(100);
-	RTC_write(RTCHOUR, ((config->format << 6) || config->hour));
+	RTC_write(RTCSEC, config->second);
 	delay(100);
 
 	return TRUE;
@@ -154,7 +164,7 @@ uint8 RTC_readHour(RTC_ConfigType* read){
 	delay(100);
 	read->hour = RTC_read(RTCHOUR);
 	delay(100);
-
+	read->format = (read->hour)&(0x42);
 	return TRUE;
 }
 

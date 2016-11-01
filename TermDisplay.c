@@ -28,10 +28,10 @@ RTC_CharArray Struct_Char = {
 };
 
 void TERM_menuDisp(UART_ChannelType uartChannel){
-	UART_putString(uartChannel,"\033[0;30;47m");
 	UART_putString(uartChannel,"\033[2J");
+	UART_putString(uartChannel,"\033[0;30;47m");
 	UART_putString(uartChannel,"\033[H");
-	UART_putString(uartChannel,"***Comunicaciï¿½n por UART e I2C***\r\n");
+	UART_putString(uartChannel,"***Comunicación por UART e I2C***\r\n");
 	UART_putString(uartChannel,"\r\n");
 	UART_putString(uartChannel,"Menu:\r\n");
 	UART_putString(uartChannel,"1) Leer Memoria I2C\r\n");
@@ -41,29 +41,21 @@ void TERM_menuDisp(UART_ChannelType uartChannel){
 	UART_putString(uartChannel,"5) Formato de hora\r\n");
 	UART_putString(uartChannel,"6) Leer hora\r\n");
 	UART_putString(uartChannel,"7) Leer fecha\r\n");
-	UART_putString(uartChannel,"8) Comunicaciï¿½n terminales\r\n");
+	UART_putString(uartChannel,"8) Comunicación terminales\r\n");
 	UART_putString(uartChannel,"9) Eco en LCD\r\n");
 	UART_putString(uartChannel,"\r\n");
-//	UART_putString(uartChannel,"La fecha actual es:\r\n");
-//    RTC_readDate(&Struct_RTC);
-//    Cast_Date(&Struct_RTC, &Struct_Char);
-//	UART_putString(uartChannel, Struct_Char.Date_Char);
-//	UART_putString(uartChannel,"\r\n");
-//    RTC_readHour(&Struct_RTC);
-//    Cast_Time(&Struct_RTC, &Struct_Char);
-//	UART_putString(uartChannel,"La hora actual es:\r\n");
-//	UART_putString(uartChannel, Struct_Char.Time_Char);
-//	UART_putString(uartChannel,"\r\n");
+
 }
 
 void TERM_readI2CDisp1(UART_ChannelType uartChannel){
 	UART_putString(uartChannel,"\033[2J");
+	UART_putString(uartChannel,"\033[0;30;47m");
 	UART_putString(uartChannel,"\033[H");
-	UART_putString(uartChannel,"***Comunicaciï¿½n por UART e I2C***\r\n");
+	UART_putString(uartChannel,"***Comunicación por UART e I2C***\r\n");
 	UART_putString(uartChannel,"\r\n");
 	UART_putString(uartChannel,"Leer memoria I2C\r\n");
 	UART_putString(uartChannel,"\r\n");
-	UART_putString(uartChannel,"Direcciï¿½n de lectura: \r\n");
+	UART_putString(uartChannel,"Dirección de lectura: \r\n");
 	UART_putString(uartChannel, "0X");
 }
 
@@ -85,12 +77,13 @@ void TERM_readI2CDisp3(UART_ChannelType uartChannel){
 
 void TERM_writeI2CDisp1(UART_ChannelType uartChannel){
 	UART_putString(uartChannel,"\033[2J");
+	UART_putString(uartChannel,"\033[0;30;47m");
 	UART_putString(uartChannel,"\033[H");
-	UART_putString(uartChannel,"***Comunicaciï¿½n por UART e I2C***\r\n");
+	UART_putString(uartChannel,"***Comunicación por UART e I2C***\r\n");
 	UART_putString(uartChannel,"\r\n");
 	UART_putString(uartChannel,"Escribir memoria I2C\r\n");
 	UART_putString(uartChannel,"\r\n");
-	UART_putString(uartChannel,"Direcciï¿½n de escritura: \r\n");
+	UART_putString(uartChannel,"Dirección de escritura: \r\n");
 	UART_putString(uartChannel, "0X");
 
 	//direccion de lectura
@@ -108,12 +101,13 @@ void TERM_writeI2CDisp3(UART_ChannelType uartChannel){
 
 void TERM_setHourDisp1(UART_ChannelType uartChannel){
 	UART_putString(uartChannel,"\033[2J");
+	UART_putString(uartChannel,"\033[0;30;47m");
 	UART_putString(uartChannel,"\033[H");
-	UART_putString(uartChannel,"***Comunicaciï¿½n por UART e I2C***\r\n");
+	UART_putString(uartChannel,"***Comunicación por UART e I2C***\r\n");
 	UART_putString(uartChannel,"\r\n");
 	UART_putString(uartChannel,"Establecer hora\r\n");
 	UART_putString(uartChannel,"\r\n");
-	UART_putString(uartChannel,"Escribir hora en hh/mm/ss: \r\n");
+	UART_putString(uartChannel,"Escribir hora en hh:mm:ss : \r\n");
 }
 
 void TERM_setHourDisp2(UART_ChannelType uartChannel){
@@ -124,8 +118,9 @@ void TERM_setHourDisp2(UART_ChannelType uartChannel){
 
 void TERM_setDateDisp1(UART_ChannelType uartChannel){
 	UART_putString(uartChannel,"\033[2J");
+	UART_putString(uartChannel,"\033[0;30;47m");
 	UART_putString(uartChannel,"\033[H");
-	UART_putString(uartChannel,"***Comunicaciï¿½n por UART e I2C***\r\n");
+	UART_putString(uartChannel,"***Comunicación por UART e I2C***\r\n");
 	UART_putString(uartChannel,"\r\n");
 	UART_putString(uartChannel,"Establecer fecha\r\n");
 	UART_putString(uartChannel,"\r\n");
@@ -140,8 +135,9 @@ void TERM_setDateDisp2(UART_ChannelType uartChannel){
 
 void TERM_setHourFormatDisp(UART_ChannelType uartChannel){
 	UART_putString(uartChannel,"\033[2J");
+	UART_putString(uartChannel,"\033[0;30;47m");
 	UART_putString(uartChannel,"\033[H");
-	UART_putString(uartChannel,"***Comunicaciï¿½n por UART e I2C***\r\n");
+	UART_putString(uartChannel,"***Comunicación por UART e I2C***\r\n");
 	UART_putString(uartChannel,"\r\n");
 	UART_putString(uartChannel,"Establecer formato de hora\r\n");
 	UART_putString(uartChannel,"\r\n");
@@ -150,8 +146,9 @@ void TERM_setHourFormatDisp(UART_ChannelType uartChannel){
 
 void TERM_readHourDisp(UART_ChannelType uartChannel){
 	UART_putString(uartChannel,"\033[2J");
+	UART_putString(uartChannel,"\033[0;30;47m");
 	UART_putString(uartChannel,"\033[H");
-	UART_putString(uartChannel,"***Comunicaciï¿½n por UART e I2C***\r\n");
+	UART_putString(uartChannel,"***Comunicación por UART e I2C***\r\n");
 	UART_putString(uartChannel,"\r\n");
 	UART_putString(uartChannel,"Hora actual:\r\n");
 	TERM_readHourDisp1(uartChannel);
@@ -166,8 +163,9 @@ void TERM_readHourDisp1(UART_ChannelType uartChannel){
 
 void TERM_readDateDisp(UART_ChannelType uartChannel){
 	UART_putString(uartChannel,"\033[2J");
+	UART_putString(uartChannel,"\033[0;30;47m");
 	UART_putString(uartChannel,"\033[H");
-	UART_putString(uartChannel,"***Comunicaciï¿½n por UART e I2C***\r\n");
+	UART_putString(uartChannel,"***Comunicación por UART e I2C***\r\n");
 	UART_putString(uartChannel,"\r\n");
 	UART_putString(uartChannel,"Fecha actual:\r\n");
 	TERM_readDateDisp1(uartChannel);
@@ -182,18 +180,20 @@ void TERM_readDateDisp1(UART_ChannelType uartChannel){
 
 void TERM_communicationDisp(UART_ChannelType uartChannel){
 	UART_putString(uartChannel,"\033[2J");
+	UART_putString(uartChannel,"\033[0;30;47m");
 	UART_putString(uartChannel,"\033[H");
-	UART_putString(uartChannel,"***Comunicaciï¿½n por UART e I2C***\r\n");
+	UART_putString(uartChannel,"***Comunicación por UART e I2C***\r\n");
 	UART_putString(uartChannel,"\r\n");
-	UART_putString(uartChannel, "Comunicaciï¿½n entre terminales");
+	UART_putString(uartChannel, "Comunicación entre terminales");
 	UART_putString(uartChannel,"\r\n");
 
 }
 
 void TERM_lcdDisp(UART_ChannelType uartChannel){
 	UART_putString(uartChannel,"\033[2J");
+	UART_putString(uartChannel,"\033[0;30;47m");
 	UART_putString(uartChannel,"\033[H");
-	UART_putString(uartChannel,"***Comunicaciï¿½n por UART e I2C***\r\n");
+	UART_putString(uartChannel,"***Comunicación por UART e I2C***\r\n");
 	UART_putString(uartChannel,"\r\n");
 	//
 	UART_putString(uartChannel,"\r\n");
