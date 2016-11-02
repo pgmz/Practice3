@@ -67,7 +67,7 @@ uint8 RTC_init();
 
 uint8 RTC_write(uint8 address, uint8 data);
 
-static uint8 RTC_read(uint8 address);
+uint8 RTC_read(uint8 address);
 
 uint8 RTC_writeHour(RTC_ConfigType* config);
 
@@ -77,15 +77,19 @@ uint8 RTC_readHour(RTC_ConfigType* read);
 
 uint8 RTC_readDate(RTC_ConfigType* read);
 
-static uint8 RTC_setAlarm0(RTC_ConfigType* alarm0);
+uint8 RTC_setAlarm0(RTC_ConfigType* alarm0);
 
-static uint8 RTC_setAlarm1(RTC_ConfigType* alarm1);
+uint8 RTC_setAlarm1(RTC_ConfigType* alarm1);
 
-static uint8 RTC_disableAlarm0();
+uint8 RTC_disableAlarm0();
 
-static uint8 RTC_disableAlarm1();
+uint8 RTC_disableAlarm1();
 
-uint8 RTC_ErrorFlag();
+void Cast_Time(RTC_ConfigType* configRAW, RTC_CharArray* config);
+
+void Cast_Date(RTC_ConfigType* configRAW, RTC_CharArray* config);
+
+
 
 
 #endif /* SOURCES_MCP7940M_H_ */

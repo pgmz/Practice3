@@ -43,7 +43,7 @@ typedef enum {BIT0,  /*!< Bit 0 */
 	          BIT29, /*!< Bit 29 */
 	          BIT30, /*!< Bit 30 */
 	          BIT31  /*!< Bit 31 */
-			}BitsType;
+			} BitsType;
 
 
 typedef enum{FALSE, TRUE} BooleanType;

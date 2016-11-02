@@ -12,7 +12,6 @@
 #include "DataTypeDefinitions.h"
 #include "GlobalFunctions.h"
 
-
 uint8 MEM_init(){
 	//I2C0, PB2 - SCL, PB3 - SDA
 	GPIO_clockGating(GPIOB);
@@ -24,6 +23,7 @@ uint8 MEM_init(){
 }
 
 uint8 MEM_write(uint16 address, char data){
+	while(I2C_busy(I2C_0) == TRUE);
 
 	uint8 h_address = 0x00FF & (address >> 8);
 	uint8 l_address = address;
@@ -52,6 +52,7 @@ uint8 MEM_write(uint16 address, char data){
 }
 
 char MEM_read(uint16 address){
+	while(I2C_busy(I2C_0) == TRUE);
 	uint8 h_address = (address >> 8);
 	uint8 l_address = address;
 	char dataFromM24LC256;
@@ -91,8 +92,5 @@ char MEM_read(uint16 address){
 
 	I2C_stop(I2C_0);
 	dataFromM24LC256 = I2C_read_Byte(I2C_0);
-
  	return dataFromM24LC256;
 }
-
-
