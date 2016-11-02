@@ -225,15 +225,9 @@ void TERM_lcdDisp(UART_ChannelType uartChannel, RTC_CharArray* RTC_Char){
 
 /** Write in the uartChannel the text when an error occurs*/
 void TERM_ErrorDisp(UART_ChannelType uartChannel, RTC_CharArray* RTC_Char){
-	UART_putString(uartChannel,"\033[2J");
-	UART_putString(uartChannel,"\033[38;5;202m");
-	UART_putString(uartChannel,"\033[48;5;15m");
-	UART_putString(uartChannel,"\033[H");
-	UART_putString(uartChannel,"***Comunicación por UART e I2C***\r\n");
 	UART_putString(uartChannel,"\r\n");
 	UART_putString(uartChannel,":( Ocurrio un error en la comunicación I2C \r\n");
 	UART_putString(uartChannel,"Verifique los dispositivos I2C \r\n");
-	UART_putString(uartChannel,"Presione ENTER para regresar al menu principal\r\n");
 
 }
 

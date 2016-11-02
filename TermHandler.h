@@ -94,9 +94,13 @@ static void TERM_LCD(UART_ChannelType uartChannel, Term_StateMachineType* statem
 static void Cast_Memory_param(Term_StateMachineType* statemachine);
 
 
-void TERM_reset();
+void timeout_Ocurred();
+
 void timeout_Enable();
+
 void timeout_Disable();
-void TERMHANDLER_envData(jmp_buf main_resume);
+
+uint8 timeout_Flag();
+
 
 #endif /* SOURCES_TERMHANDLER_H_ */

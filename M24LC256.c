@@ -44,22 +44,22 @@ uint8 MEM_write(uint16 address, char data){
 	/** Wait for transfer complete*/
 	I2C_wait(I2C_0);
 	/** Wait for ack byte from slave*/
-	while(I2C_get_ACK(I2C_0) != 0);
+	while(((timeout_Flag() == 0) && (I2C_get_ACK(I2C_0) == TRUE)));
 
 	/** Write the high part of address*/
 	I2C_write_Byte(I2C_0, h_address);
 	I2C_wait(I2C_0);
-	while(I2C_get_ACK(I2C_0) != 0);
+	while(((timeout_Flag() == 0) && (I2C_get_ACK(I2C_0) == TRUE)));
 
 	/** Write the low part of address*/
 	I2C_write_Byte(I2C_0, l_address);
 	I2C_wait(I2C_0);
-	while(I2C_get_ACK(I2C_0) != 0);
+	while(((timeout_Flag() == 0) && (I2C_get_ACK(I2C_0) == TRUE)));
 
 	/** Write the data*/
 	I2C_write_Byte(I2C_0, data);
 	I2C_wait(I2C_0);
-	while(I2C_get_ACK(I2C_0) != 0);
+	while(((timeout_Flag() == 0) && (I2C_get_ACK(I2C_0) == TRUE)));
 
 	/** Send the stop signal*/
 	I2C_stop(I2C_0);
@@ -84,17 +84,17 @@ char MEM_read(uint16 address){
 	/** Write Control byte for writting*/
 	I2C_write_Byte(I2C_0, MEM_CONTROL_W);
 	I2C_wait(I2C_0);
-	while(I2C_get_ACK(I2C_0) != 0);
+	while(((timeout_Flag() == 0) && (I2C_get_ACK(I2C_0) == TRUE)));
 
 	/** Send high address*/
 	I2C_write_Byte(I2C_0, h_address);
 	I2C_wait(I2C_0);
-	while(I2C_get_ACK(I2C_0) != 0);
+	while(((timeout_Flag() == 0) && (I2C_get_ACK(I2C_0) == TRUE)));
 
 	/** Send low address*/
 	I2C_write_Byte(I2C_0, l_address);
 	I2C_wait(I2C_0);
-	while(I2C_get_ACK(I2C_0) != 0);
+	while(((timeout_Flag() == 0) && (I2C_get_ACK(I2C_0) == TRUE)));
 
 	/** Send repeated start signal (start signal)*/
 	I2C_repeted_Start(I2C_0);
@@ -102,7 +102,7 @@ char MEM_read(uint16 address){
 	/** Write Control byte for reading*/
 	I2C_write_Byte(I2C_0, MEM_CONTROL_R);
 	I2C_wait(I2C_0);
-	while(I2C_get_ACK(I2C_0) != 0);
+	while(((timeout_Flag() == 0) && (I2C_get_ACK(I2C_0) == TRUE)));
 
 	/** Change to receiving mode*/
 	I2C_TX_RX_Mode(I2C_0, I2C_RX_MODE);

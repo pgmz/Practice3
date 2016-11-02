@@ -10,8 +10,6 @@
 #include "M24LC256.h"
 #include "TermDisplay.h"
 #include "PIT.h"
-#include <setjmp.h>
-#include <stdio.h>
 
 RTC_ConfigType Struct_RTC_W = {
 		6,
@@ -124,9 +122,8 @@ TermHandler_StateMachineType TermHandler_StateMachine = {
 		FALSE, FALSE, FALSE, FALSE, FALSE
 };
 
-jmp_buf return_to_main;
 
-
+static uint8 timeout_flag = FALSE;
 
 
 uint8 TERM_upd(){
@@ -613,14 +610,10 @@ void Cast_Memory_param(Term_StateMachineType* statemachine){
 }
 
 uint8 TERMHANDLER_init(){
-	TERM1_init();
-	TERM2_init();
-
-	setjmp(return_to_main);
 
 	NVIC_enableInterruptAndPriority(PIT_CH0_IRQ, PRIORITY_11);
 
-	NVIC_enableInterruptAndPriority(PIT_CH1_IRQ, PRIORITY_7);
+	NVIC_enableInterruptAndPriority(PIT_CH1_IRQ, PRIORITY_12);
 
 	EnableInterrupts;
 
@@ -631,9 +624,8 @@ uint8 TERMHANDLER_init(){
 	PIT_timerInterruptEnable(PIT_0);
 	PIT_timerEnable(PIT_0);
 
-
-
-	//setjmp(return_to_main);
+	TERM1_init();
+	TERM2_init();
 
 	timeout_Enable();
 	RTC_write(0,0x80);
@@ -644,40 +636,58 @@ uint8 TERMHANDLER_init(){
 }
 
 
-void TERM_reset(){
-
-	if(TermHandler_StateMachine.id == '1'){
-
-		Term1_StateMachine.currentMenu = MenuDisp;
-		Term1_StateMachine.currentMenuParameter = Option_param;
-		Term1_StateMachine.shift_counter = 0;
-		(*ftpr_Disp_Array[MenuDisp])(UART_0, &Struct_Char_R);
-		(*ftpr_Disp_Array[18])(UART_0, &Struct_Char_R);
-
-
-	}else if(TermHandler_StateMachine.id == '2'){
-		Term2_StateMachine.currentMenu = MenuDisp;
-		Term2_StateMachine.currentMenuParameter = Option_param;
-		Term2_StateMachine.shift_counter = 0;
-		(*ftpr_Disp_Array[MenuDisp])(UART_4, &Struct_Char_R);
-		(*ftpr_Disp_Array[18])(UART_4, &Struct_Char_R);
-
-	}else{
-
-	}
-
-	timeout_Disable();
- 	longjmp(return_to_main, 1);
-
+void timeout_Ocurred(){
+	timeout_flag = TRUE;
+	PIT_timerInterruptDisable(PIT_1);
+	PIT_timerDisable(PIT_1);
 }
 
 void timeout_Enable(){
-	PIT_delay(PIT_1,SYSTEM_CLOCK,1);
+	PIT_delay(PIT_1,SYSTEM_CLOCK,0.5);
 	PIT_timerInterruptEnable(PIT_1);
 	PIT_timerEnable(PIT_1);
 }
 
 void timeout_Disable(){
+	if(timeout_flag == TRUE){
+		timeout_flag = FALSE;
+
+		if((Term1_StateMachine.currentMenu != CommunicationDisp)
+				&&(Term1_StateMachine.currentMenu != LCDDisp)){
+			Term1_StateMachine.currentMenu = MenuDisp;
+			Term1_StateMachine.currentMenuParameter = Option_param;
+
+			(*ftpr_Disp_Array[Term1_StateMachine.currentMenu])(UART_0, &Struct_Char_W);
+			(*ftpr_Disp_Array[18])(UART_0, &Struct_Char_W);
+
+		}
+
+		if((Term2_StateMachine.currentMenu != CommunicationDisp)
+				&&(Term2_StateMachine.currentMenu != LCDDisp)){
+			Term2_StateMachine.currentMenu = MenuDisp;
+			Term2_StateMachine.currentMenuParameter = Option_param;
+
+			(*ftpr_Disp_Array[Term2_StateMachine.currentMenu])(UART_4, &Struct_Char_W);
+			(*ftpr_Disp_Array[18])(UART_4, &Struct_Char_W);
+		}
+
+	}
+
+	if(Term1_StateMachine.currentMenu == MenuDisp){
+				(*ftpr_Disp_Array[Term1_StateMachine.currentMenu])(UART_0, &Struct_Char_W);
+
+			}
+
+			if(Term2_StateMachine.currentMenu == MenuDisp){
+
+				(*ftpr_Disp_Array[Term2_StateMachine.currentMenu])(UART_4, &Struct_Char_W);
+
+			}
+
 	PIT_timerDisable(PIT_1);
+	timeout_flag = FALSE;
 }
 
+uint8 timeout_Flag(){
+	return timeout_flag;
+}

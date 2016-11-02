@@ -38,17 +38,17 @@ uint8 RTC_write(uint8 address, uint8 data){
 	/** Send Control byte or chip select, for writting in the RTC*/
 	I2C_write_Byte(I2C_0, CONTROL_W);
 	I2C_wait(I2C_0);
-	while(I2C_get_ACK(I2C_0) != 0);
+	while(((timeout_Flag() == 0) && (I2C_get_ACK(I2C_0) == TRUE)));
 
 	/** Send the internal address, to write in that address*/
 	I2C_write_Byte(I2C_0, address);
 	I2C_wait(I2C_0);
-	while(I2C_get_ACK(I2C_0) != 0);
+	while(((timeout_Flag() == 0) && (I2C_get_ACK(I2C_0) == TRUE)));
 
 	/** Send the data*/
 	I2C_write_Byte(I2C_0, data);
 	I2C_wait(I2C_0);
-	while(I2C_get_ACK(I2C_0) != 0);
+	while(((timeout_Flag() == 0) && (I2C_get_ACK(I2C_0) == TRUE)));
 
 	/** Send stop signal*/
 	I2C_stop(I2C_0);
@@ -68,18 +68,18 @@ uint8 RTC_read(uint8 address){
 	/** Send Control byte or chip select to write in the RTC*/
 	I2C_write_Byte(I2C_0, CONTROL_W);
 	I2C_wait(I2C_0);
-	while(I2C_get_ACK(I2C_0) != 0);
+	while(((timeout_Flag() == 0) && (I2C_get_ACK(I2C_0) == TRUE)));
 
 	/** Send the internal address, that will be read*/
 	I2C_write_Byte(I2C_0, address);
 	I2C_wait(I2C_0);
-	while(I2C_get_ACK(I2C_0) != 0);
+	while(((timeout_Flag() == 0) && (I2C_get_ACK(I2C_0) == TRUE)));
 
 	/** Send repeated start signal (start signal)*/
 	I2C_repeted_Start(I2C_0);
 	I2C_write_Byte(I2C_0, CONTROL_R);
 	I2C_wait(I2C_0);
-	while(I2C_get_ACK(I2C_0) != 0);
+	while(((timeout_Flag() == 0) && (I2C_get_ACK(I2C_0) == TRUE)));
 
 	/** Change to receiving mode*/
 	I2C_TX_RX_Mode(I2C_0, I2C_RX_MODE);
