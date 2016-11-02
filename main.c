@@ -36,38 +36,40 @@
 #include "M24LC256.h"
 #include "GlobalFunctions.h"
 #include "UART.h"
-#include "LCDNokia5110.h"
-#include "SPI.h"
-/*Set values to set up the SPI */
-const SPI_ConfigType SPI_Config={SPI_DISABLE_FIFO,
-							SPI_LOW_POLARITY,
-							SPI_LOW_PHASE,
-							SPI_MSB,
-							SPI_0,
-							SPI_MASTER,
-							GPIO_MUX2,
-							SPI_BAUD_RATE_2,
-							SPI_FSIZE_8,
-							{GPIOD,BIT1,BIT2}};
+#include "MCG.h"
+#include <setjmp.h>
+
+#define CLK_FREQ_HZ 50000000  /* CLKIN0 frequency */
+#define SLOW_IRC_FREQ 32768	/*This is the approximate value for the slow irc*/
+#define FAST_IRC_FREQ 4000000 /*This is the approximate value for the fast irc*/
+#define EXTERNAL_CLOCK 0 /*It defines an external clock*/
+#define PLL_ENABLE 1 /**PLL is enabled*/
+#define PLL_DISABLE 0 /**PLL is disabled*/
+#define CRYSTAL_OSC 1  /*It defines an crystal oscillator*/
+#define LOW_POWER 0     /* Set the oscillator for low power mode */
+#define SLOW_IRC 0 		/* Set the slow IRC */
+#define CLK0_TYPE 0     /* Crystal or canned oscillator clock input */
+#define PLL0_PRDIV 25    /* PLL predivider value */
+#define PLL0_VDIV 30    /* PLL multiplier value*/
 
 int main(void)
 {
 
+
+
+	int mcg_clk_hz;
+	unsigned char modeMCG = 0;
+
+	mcg_clk_hz = fei_fbi(SLOW_IRC_FREQ, SLOW_IRC); // 64 Hz -> 32768 Hz
+	mcg_clk_hz = fbi_fbe(CLK_FREQ_HZ, LOW_POWER, EXTERNAL_CLOCK); // 97.656k Hz -> 50000000 Hz
+	mcg_clk_hz = fbe_pbe(CLK_FREQ_HZ, PLL0_PRDIV, PLL0_VDIV);
+	mcg_clk_hz = pbe_pee(CLK_FREQ_HZ); // 117.18 kHz -> 60000000 Hz
+
     /* Write your code here */
-
-
-	/*Initializes the SPI*/
-	SPI_init(&SPI_Config);
-	/*Initializes LCD*/
-	LCDNokia_init();
-	/*Initializes the RTC*/
 	RTC_init();
-	/*Initializes the Memory*/
     MEM_init();
-	/*Initializes the SPI*/
 	TERMHANDLER_init();
     for (;;) {
-    	/*Update the time and date of the UART terminal, I2C terminal and LCD*/
     	TERM_upd();
     }
     /* Never leave main */

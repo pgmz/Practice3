@@ -10,22 +10,23 @@
 #include "NVIC.h"
 #include "DataTypeDefinitions.h"
 
-/*!
- 	 \brief	 This is the interrupt services routing (ISR).
- 	 \param[in]  void.
- 	 \return void
- */
 
-
+/** UART0_MailBox*/
 UART_MailBoxType UART0_MailBox = {FALSE,0x0};
+/** UART1_MailBox*/
 UART_MailBoxType UART1_MailBox = {FALSE,0x0};
+/** UART2_MailBox*/
 UART_MailBoxType UART2_MailBox = {FALSE,0x0};
+/** UART3_MailBox*/
 UART_MailBoxType UART3_MailBox = {FALSE,0x0};
+/** UART4_MailBox*/
 UART_MailBoxType UART4_MailBox = {FALSE,0x0};
+/** UART5_MailBox*/
 UART_MailBoxType UART5_MailBox = {FALSE,0x0};
 
 void UART0_RX_TX_IRQHandler(){
 	while (!(UART0_S1 & UART_S1_RDRF_MASK));
+		/** Sets flag to TRUE, stores data, and does an 'echo' of the input char*/
 		UART0_MailBox.flag = TRUE;
 		UART0_MailBox.mailBox = UART0_D;
 		UART_putChar(UART_0, UART0_MailBox.mailBox);
@@ -34,6 +35,7 @@ void UART0_RX_TX_IRQHandler(){
 
 void UART1_RX_TX_IRQHandler(){
 	while (!(UART1_S1 & UART_S1_RDRF_MASK));
+	/** Sets flag to TRUE, stores data, and does an 'echo' of the input char*/
 		UART1_MailBox.flag = TRUE;
 		UART1_MailBox.mailBox = UART1_D;
 		UART_putChar(UART_1, UART1_MailBox.mailBox);
@@ -42,6 +44,7 @@ void UART1_RX_TX_IRQHandler(){
 
 void UART2_RX_TX_IRQHandler(){
 	while (!(UART2_S1 & UART_S1_RDRF_MASK));
+	/** Sets flag to TRUE, stores data, and does an 'echo' of the input char*/
 		UART2_MailBox.flag = TRUE;
 		UART2_MailBox.mailBox = UART2_D;
 		UART_putChar(UART_2, UART2_MailBox.mailBox);
@@ -50,6 +53,7 @@ void UART2_RX_TX_IRQHandler(){
 
 void UART3_RX_TX_IRQHandler(){
 	while (!(UART3_S1 & UART_S1_RDRF_MASK));
+	/** Sets flag to TRUE, stores data, and does an 'echo' of the input char*/
 		UART3_MailBox.flag = TRUE;
 		UART3_MailBox.mailBox = UART3_D;
 		UART_putChar(UART_3, UART3_MailBox.mailBox);
@@ -58,6 +62,7 @@ void UART3_RX_TX_IRQHandler(){
 
 void UART4_RX_TX_IRQHandler(){
 	while (!(UART4_S1 & UART_S1_RDRF_MASK));
+	/** Sets flag to TRUE, stores data, and does an 'echo' of the input char*/
 		UART4_MailBox.flag = TRUE;
 		UART4_MailBox.mailBox = UART4_D;
 		UART_putChar(UART_4, UART4_MailBox.mailBox);
@@ -65,21 +70,15 @@ void UART4_RX_TX_IRQHandler(){
 
 void UART5_RX_TX_IRQHandler(){
 	while (!(UART5_S1 & UART_S1_RDRF_MASK));
+	/** Sets flag to TRUE, stores data, and does an 'echo' of the input char*/
 		UART5_MailBox.flag = TRUE;
 		UART5_MailBox.mailBox = UART5_D;
 		UART_putChar(UART_5, UART5_MailBox.mailBox);
 }
 
-//
-/********************************************************************************************/
-/********************************************************************************************/
-/********************************************************************************************/
 /*!
  	 \brief	 It configures the UART to be used
- 	 \param[in]  uartChannel indicates which UART will be used.
- 	 \param[in]  systemClk indicates the MCU frequency.
- 	 \param[in]  baudRate sets the baud rate to transmit.
- 	 \return void
+
  */
 void UART_init(UART_ChannelType uartChannel, uint32 systemClk, UART_BaudRateType baudRate, uint8 BRFA){
 		float UARTbaudrate = systemClk/(16*baudRate) - (BRFA/32);
@@ -147,15 +146,9 @@ void UART_init(UART_ChannelType uartChannel, uint32 systemClk, UART_BaudRateType
 
 }
 
-/********************************************************************************************/
-/********************************************************************************************/
-/********************************************************************************************/
 /*!
  	 \brief	 enables the RX UART interrupt). This function should include the next sentence:
- 	 while (!(UART0_S1 & UART_S1_RDRF_MASK)). It is to guaranty that the incoming data is complete
- 	 when reception register is read. For more details see chapter 52 in the kinetis reference manual.
- 	 \param[in]  uartChannel indicates the UART channel.
- 	 \return void
+
  */
 void UART0_interruptEnable(UART_ChannelType uartChannel){
 	switch(uartChannel){
@@ -186,16 +179,11 @@ void UART0_interruptEnable(UART_ChannelType uartChannel){
 	}
 }
 
-/********************************************************************************************/
-/********************************************************************************************/
-/********************************************************************************************/
 /*!
  	 \brief	 It sends one character through the serial port. This function should include the next sentence:
  	 while(!(UART0_S1 & UART_S1_TC_MASK)). It is to guaranty that before to try to transmit a byte, the previous
  	 one was transmitted. In other word, to avoid to transmit data while the UART is busy transmitting information.
- 	 \param[in]  uartChannel indicates the UART channel.
- 	 \param[in]  character to be transmitted.
- 	 \return void
+
  */
 
 void UART_putChar (UART_ChannelType uartChannel, uint8 character){
@@ -231,14 +219,10 @@ void UART_putChar (UART_ChannelType uartChannel, uint8 character){
 		break;
 	}
 }
-/********************************************************************************************/
-/********************************************************************************************/
-/********************************************************************************************/
+
 /*!
  	 \brief	 It sends a string character through the serial port.
- 	 \param[in]  uartChannel indicates the UART channel.
- 	 \param[in]  string pointer to the string to be transmitted.
- 	 \return void
+
  */
 void UART_putString(UART_ChannelType uartChannel, sint8* string){
 
@@ -248,6 +232,10 @@ void UART_putString(UART_ChannelType uartChannel, sint8* string){
 }
 
 
+/*!
+ 	 \brief	 Returns mail box flag
+
+ */
 uint8 UART_MailBoxFlag(UART_ChannelType uartChannel){
 	switch(uartChannel){
 	case UART_0:
@@ -265,6 +253,11 @@ uint8 UART_MailBoxFlag(UART_ChannelType uartChannel){
 	}
 }
 
+
+/*!
+ 	 \brief	 Returns Mail Box Data
+
+ */
 uint8 UART_MailBoxData(UART_ChannelType uartChannel){
 	switch(uartChannel){
 	case UART_0:

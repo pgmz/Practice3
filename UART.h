@@ -87,8 +87,24 @@ void UART_putChar (UART_ChannelType uartChannel, uint8 character);
  */
 void UART_putString(UART_ChannelType uartChannel, sint8* string);
 
+/********************************************************************************************/
+/********************************************************************************************/
+/********************************************************************************************/
+/*!
+ 	 \brief	 Return the flag in the MailBox of the selected UART
+ 	 \param[in]  uartChannel indicates the UART channel.
+ 	 \return uint8 the Mail Box Flag
+ */
 uint8 UART_MailBoxFlag(UART_ChannelType uartChannel);
 
+/********************************************************************************************/
+/********************************************************************************************/
+/********************************************************************************************/
+/*!
+ 	 \brief	 Return the data in the MailBox of the selected UART
+ 	 \param[in]  uartChannel indicates the UART channel.
+ 	 \return uint8 the Mail Box Data
+ */
 uint8 UART_MailBoxData(UART_ChannelType uartChannel);
 
 #endif /* UART_H_ */

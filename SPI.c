@@ -228,13 +228,36 @@ void SPI_stopTranference(SPI_ChannelType channel){
 }
 
 /*Sends data (1 byte) through the SPI channel 0*/
-void SPI_sendOneByte(uint8 Data){
-	/*Pushes the data in the TX FIFO*/
-	SPI0_PUSHR = (Data);
-	/*While transference is completed, wait*/
-	while(0 == (SPI0_SR & SPI_SR_TCF_MASK));
-	/*Clear the Transference complete flag*/
-	SPI0_SR |= SPI_SR_TCF_MASK;
+void SPI_sendOneByte(SPI_ChannelType channel, uint8 Data){
+	switch(channel){
+	case SPI_0:
+		/*Pushes the data in the TX FIFO*/
+		SPI0_PUSHR = (Data);
+		/*While transference is completed, wait*/
+		while(0 == (SPI0_SR & SPI_SR_TCF_MASK));
+		/*Clear the Transference complete flag*/
+		SPI0_SR |= SPI_SR_TCF_MASK;
+		break;
+
+	case SPI_1:
+		/*Pushes the data in the TX FIFO*/
+		SPI1_PUSHR = (Data);
+		/*While transference is completed, wait*/
+		while(0 == (SPI1_SR & SPI_SR_TCF_MASK));
+		/*Clear the Transference complete flag*/
+		SPI1_SR |= SPI_SR_TCF_MASK;
+		break;
+
+	case SPI_2:
+		/*Pushes the data in the TX FIFO*/
+		SPI2_PUSHR = (Data);
+		/*While transference is completed, wait*/
+		while(0 == (SPI2_SR & SPI_SR_TCF_MASK));
+		/*Clear the Transference complete flag*/
+		SPI2_SR |= SPI_SR_TCF_MASK;
+		break;
+	}
+
 }
 
 /*Initialize a SPI channel, according to a struct that has the configuration

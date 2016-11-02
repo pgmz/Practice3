@@ -13,179 +13,179 @@
 #include "DataTypeDefinitions.h"
 #include "GlobalFunctions.h"
 
-//uint8 Time_Char[]="00:00:00";
 
 uint8 RTC_init(){
-	//I2C0, PB2 - SCL, PB3 - SDA
+
+	/** Enables the clock gating to use PORTB*/
 	GPIO_clockGating(GPIOB);
+
+	/** Use PB2 and PB3 with the functionality of I2C0, PB2 - SCL, PB3 - SDA*/
 	GPIO_pinControlRegisterType pinControlRegister= GPIO_MUX2;
 	GPIO_pinControlRegister(GPIOB, BIT2, &pinControlRegister);
 	GPIO_pinControlRegister(GPIOB, BIT3, &pinControlRegister);
+
+	/*I2C init*/
 	I2C_init(I2C_0, SYSTEM_CLOCK, BD_9600);
 }
 
-
-void Cast_Time(RTC_ConfigType* configRAW, RTC_CharArray* config){
-	uint8 units_seconds = configRAW->second & 0x0F;
-	uint8 dozens_seconds = ((configRAW->second >> 4) & (0x7));
-	config->Time_Char[7] = (char)(units_seconds + 48);
-	config->Time_Char[6] = (char)(dozens_seconds + 48);
-
-	uint8 units_minutes = configRAW->minute & 0x0F;
-	uint8 dozens_minutes = configRAW->minute >> 4;
-	config->Time_Char[4] = (char)(units_minutes + 48);
-	config->Time_Char[3] = (char)(dozens_minutes + 48);
-
-	uint8 units_hours = configRAW->hour& 0x0F;
-	uint8 dozens_hours = (configRAW->hour >> 4) & ~(0x4);
-
-	configRAW->format = (((configRAW->hour >> 4) & (0x4)) == FALSE)?(FALSE):(TRUE);
-
-	if(configRAW->format == TRUE){
-		if((dozens_hours & 0x2) == FALSE){
-				config->Time_Char[9] = 'P';
-				config->Time_Char[10] = 'M';
-			}else{
-				dozens_hours = dozens_hours & ~(0x2);
-				config->Time_Char[9] = 'A';
-				config->Time_Char[10] = 'M';
-
-			}
-	} else {
-		config->Time_Char[9] = ' ';
-		config->Time_Char[10] = ' ';
-	}
-	config->Time_Char[1] = (char)(units_hours + 48);
-	config->Time_Char[0] = (char)(dozens_hours + 48);
-
-
-
-}
-
-void Cast_Date(RTC_ConfigType* configRAW, RTC_CharArray* config){
-
-	//"01/01/2000",
-
-	uint8 units_year = configRAW->year & 0x0F;
-	uint8 dozens_year =configRAW->year >> 4;
-	config->Date_Char[9] = (char)(units_year + 48);
-	config->Date_Char[8] = (char)(dozens_year + 48);
-
-	uint8 units_month = configRAW->month & 0x0F;
-	uint8 dozens_month = (configRAW->month >> 4) & ~0x2;
-	config->Date_Char[4] = (char)(units_month + 48);
-	config->Date_Char[3] = (char)(dozens_month + 48);
-
-	uint8 units_days = configRAW->date & 0x0F;
-	uint8 dozens_days =configRAW->date >> 4;
-	config->Date_Char[1] = (char)(units_days + 48);
-	config->Date_Char[0] = (char)(dozens_days + 48);
-}
-
+/** Function that writes in the RTC*/
 uint8 RTC_write(uint8 address, uint8 data){
-	while(I2C_busy(I2C_0) == TRUE);
+
+	/** Send start signal*/
 	I2C_TX_RX_Mode(I2C_0, I2C_TX_MODE);
 	I2C_start(I2C_0);
+
+	/** Send Control byte or chip select, for writting in the RTC*/
 	I2C_write_Byte(I2C_0, CONTROL_W);
 	I2C_wait(I2C_0);
-	I2C_get_ACK(I2C_0);
+	while(I2C_get_ACK(I2C_0) != 0);
 
+	/** Send the internal address, to write in that address*/
 	I2C_write_Byte(I2C_0, address);
 	I2C_wait(I2C_0);
-	I2C_get_ACK(I2C_0);
+	while(I2C_get_ACK(I2C_0) != 0);
 
+	/** Send the data*/
 	I2C_write_Byte(I2C_0, data);
 	I2C_wait(I2C_0);
-	I2C_get_ACK(I2C_0);
+	while(I2C_get_ACK(I2C_0) != 0);
 
+	/** Send stop signal*/
 	I2C_stop(I2C_0);
 
 	return TRUE;
 }
 
+/** Function that read from the RTC*/
 uint8 RTC_read(uint8 address){
-	while(I2C_busy(I2C_0) == TRUE);
+
 	uint8 dataFromMCP7940M;
+
+	/** Send start signal*/
 	I2C_TX_RX_Mode(I2C_0, I2C_TX_MODE);
 	I2C_start(I2C_0);
 
+	/** Send Control byte or chip select to write in the RTC*/
 	I2C_write_Byte(I2C_0, CONTROL_W);
 	I2C_wait(I2C_0);
-	I2C_get_ACK(I2C_0);
+	while(I2C_get_ACK(I2C_0) != 0);
 
+	/** Send the internal address, that will be read*/
 	I2C_write_Byte(I2C_0, address);
 	I2C_wait(I2C_0);
-	I2C_get_ACK(I2C_0);
+	while(I2C_get_ACK(I2C_0) != 0);
 
+	/** Send repeated start signal (start signal)*/
 	I2C_repeted_Start(I2C_0);
 	I2C_write_Byte(I2C_0, CONTROL_R);
 	I2C_wait(I2C_0);
-	I2C_get_ACK(I2C_0);
+	while(I2C_get_ACK(I2C_0) != 0);
 
+	/** Change to receiving mode*/
 	I2C_TX_RX_Mode(I2C_0, I2C_RX_MODE);
-
 	I2C_NACK(I2C_0);
+
+	/** Dummy read*/
 	dataFromMCP7940M = I2C_read_Byte(I2C_0);
 	I2C_wait(I2C_0);
-	//I2C_TX_RX_Mode(I2C_0, I2C_TX_MODE);
-	//I2C_NACK(I2C_0);
 
+	/** Send stop signal*/
 	I2C_stop(I2C_0);
+
+	/** Read from the RTC*/
 	dataFromMCP7940M = I2C_read_Byte(I2C_0);
 
 	return dataFromMCP7940M;
 }
 
+/** Function that writes a 'full hour' config*/
 uint8 RTC_writeHour(RTC_ConfigType* config){
+
+	//Write hour with the corresponding format
 	RTC_write(RTCHOUR, ((config->format << 6) | config->hour));
 	delay(100);
+
+	//Write the minutes
 	RTC_write(RTCMIN, config->minute);
 	delay(100);
-	RTC_write(RTCSEC, config->second);
+
+	//Writes the seconds, and the ST, that enables the RTC to use the
+	//external crystal
+	RTC_write(RTCSEC, ((config->second))|0x80);
 	delay(100);
 
 	return TRUE;
 }
 
+/** Functino that writes a date config*/
 uint8 RTC_writeDate(RTC_ConfigType* config){
+
+	/** Write the weekday*/
 	RTC_write(RTCWKDAY, config->weekday);
 	delay(100);
+
+	/** Write the day*/
 	RTC_write(RTCDATE, config->date);
 	delay(100);
+
+	/** Write the month*/
 	RTC_write(RTCMTH, config->month);
 	delay(100);
+
+	/** Write the year*/
 	RTC_write(RTCYEAR, config->year);
 	delay(100);
 
 	return TRUE;
 }
 
+/** Read a 'full hour', and write in the read struct*/
 uint8 RTC_readHour(RTC_ConfigType* read){
+
+	/** Read seconds*/
 	read->second = RTC_read(RTCSEC);
 	delay(100);
+
+	/** Read minutes*/
 	read->minute = RTC_read(RTCMIN);
 	delay(100);
+
+	/** Read the hour*/
 	read->hour = RTC_read(RTCHOUR);
 	delay(100);
-	read->format = (read->hour)&(0x42);
+
+	/** Read implicitly, the format*/
+	if((read->hour & 0x40) == 0){
+		read->format = 0;
+	} else {
+		read->format = 1;
+	}
 	return TRUE;
 }
 
+/** Read a date, and write in the read struct*/
 uint8 RTC_readDate(RTC_ConfigType* read){
+	/** Read weekday*/
 	read->weekday = RTC_read(RTCWKDAY);
 	delay(100);
+
+	/** Read day*/
 	read->date = RTC_read(RTCDATE);
 	delay(100);
+
+	/** Read month*/
 	read->month = RTC_read(RTCMTH);
 	delay(100);
+
+	/** Read year*/
 	read->year = RTC_read(RTCYEAR);
 	delay(100);
 
 	return TRUE;
 }
 
+/** Write the Alarm 0*/
 uint8 RTC_setAlarm0(RTC_ConfigType* alarm0){
-	//enable alarm ----
 
 	RTC_write(ALM0SEC, alarm0->second);
 	RTC_write(ALM0MIN, alarm0->minute);
@@ -197,8 +197,8 @@ uint8 RTC_setAlarm0(RTC_ConfigType* alarm0){
 	return TRUE;
 }
 
+/** Write the Alarm 1*/
 uint8 RTC_setAlarm1(RTC_ConfigType* alarm1){
-	//enable alarm --
 
 	RTC_write(ALM1SEC, alarm1->second);
 	RTC_write(ALM1MIN, alarm1->minute);
@@ -210,6 +210,8 @@ uint8 RTC_setAlarm1(RTC_ConfigType* alarm1){
 	return TRUE;
 }
 
+/** Disable the alarm 0*/
 uint8 RTC_disableAlarm0();
 
+/** Disable the alarm 1*/
 uint8 RTC_disableAlarm1();

@@ -173,6 +173,7 @@ void PIT0_IRQHandler(){
 void PIT1_IRQHandler(){
 	PIT1_clearInterrupt();
 	PIT_MailBox1.flag = TRUE;
+	TERM_reset();
  }
 
 void PIT2_IRQHandler(){

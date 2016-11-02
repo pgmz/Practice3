@@ -210,10 +210,11 @@ void SPI_stopTranference(SPI_ChannelType channel);
 /********************************************************************************************/
 /*!
  	 \brief This sends a byte data through a SPI channel
- 	 \param[in] Data to send in the SPI0
+ 	 \param[in] channel through the data will be sent
+ 	 \param[in] Data to send in the SPI channel
  	 \return void
  */
-void SPI_sendOneByte(uint8 Data);
+void SPI_sendOneByte(SPI_ChannelType channel,uint8 Data);
 /********************************************************************************************/
 /********************************************************************************************/
 /********************************************************************************************/
