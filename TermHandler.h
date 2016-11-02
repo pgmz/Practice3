@@ -102,5 +102,5 @@ void timeout_Disable();
 
 uint8 timeout_Flag();
 
-
+void Button_Hour();
 #endif /* SOURCES_TERMHANDLER_H_ */

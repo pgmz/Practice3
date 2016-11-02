@@ -12,6 +12,7 @@
 #include "PIT.h"
 #include "DISP.h"
 #include "LCDNokia5110.h"
+#include "BTTN.h"
 
 RTC_ConfigType Struct_RTC_W = {
 		6,
@@ -127,6 +128,9 @@ TermHandler_StateMachineType TermHandler_StateMachine = {
 
 static uint8 timeout_flag = FALSE;
 static uint8 timeout_notification = FALSE;
+static uint8 manual_mode = FALSE;
+static uint8 manual_counter_hour = FALSE;
+static uint8 manual_counter_date = FALSE;
 
 uint8 TERM_upd(){
 
@@ -160,9 +164,13 @@ uint8 TERM_upd(){
 			(*ftpr_Disp_Array[17])(UART_4, &Struct_Char_R);
 		}
 
-		if(TermHandler_StateMachine.LCDBusy == FALSE){
+		if((TermHandler_StateMachine.LCDBusy == FALSE) && (manual_mode == FALSE)){
 		Info_Display(&Struct_Char_R);
 		}
+	}
+
+	if(BTTN_mailBoxFlag() == TRUE){
+		Button_Hour();
 	}
 }
 
@@ -723,4 +731,114 @@ void timeout_Disable(){
 
 uint8 timeout_Flag(){
 	return timeout_flag;
+}
+
+
+void Button_Hour(){
+	if(((TermHandler_StateMachine.RTCBusy == FALSE)
+			&& (TermHandler_StateMachine.LCDBusy == FALSE)) || (manual_mode == TRUE)){
+		TermHandler_StateMachine.RTCBusy = TRUE;
+		TermHandler_StateMachine.LCDBusy = TRUE;
+
+		if(manual_mode == FALSE){
+		manual_mode = TRUE;
+
+		Button_Display(&Struct_Char_W);
+
+		BTTN_mailBoxData();
+		manual_counter_hour = 0;
+		manual_counter_date = 0;
+		return;
+		} else{
+			switch(BTTN_mailBoxData()){
+			case BUTTON_0:
+				if(manual_counter_hour >= 8){
+					return;
+				}
+				if(((Struct_Char_W.Time_Char[manual_counter_hour]) + 1) <= '9'){
+					Struct_Char_W.Time_Char[manual_counter_hour] += 1;
+				}
+				break;
+
+			case BUTTON_1:
+				if(manual_counter_hour >= 8){
+					return;
+				}
+				if((Struct_Char_W.Time_Char[manual_counter_hour] - 1) >= '0'){
+					Struct_Char_W.Time_Char[manual_counter_hour] -= 1;
+				}
+				break;
+
+			case BUTTON_2:
+
+				manual_counter_hour++;
+				if((manual_counter_hour == 2) || (manual_counter_hour == 5)){
+					manual_counter_hour++;
+				}
+				if(manual_counter_hour >= 8){
+					manual_counter_hour = 8;
+				}
+
+				break;
+
+			case BUTTON_3:
+				if(manual_counter_date >= 10){
+					manual_counter_date = 10;
+				}
+				if((Struct_Char_W.Date_Char[manual_counter_date] + 1) <= '9'){
+					Struct_Char_W.Date_Char[manual_counter_date] += 1;
+				}
+				break;
+
+			case BUTTON_4:
+				if(manual_counter_date >= 10){
+					manual_counter_date = 10;
+				}
+				if((Struct_Char_W.Date_Char[manual_counter_date] - 1) >= '0'){
+					Struct_Char_W.Date_Char[manual_counter_date] -= 1;
+				}
+				break;
+
+			case BUTTON_5:
+
+				manual_counter_date++;
+				if((manual_counter_date == 2) || (manual_counter_date == 5)){
+					manual_counter_date++;
+				}
+				if(manual_counter_date >= 10){
+					manual_counter_date = 10;
+				}
+
+				break;
+
+			default:
+				break;
+			}
+
+			Button_Display(&Struct_Char_W);
+
+		}
+
+		if((manual_counter_date == 10) && (manual_counter_hour == 8)){
+
+
+			Hour_Check(&Struct_Char_W,&Struct_RTC_W);
+			Date_Check(&Struct_Char_W,&Struct_RTC_W);
+			timeout_Enable();
+			RTC_writeHour(&Struct_RTC_W);
+			timeout_Disable();
+
+			timeout_Enable();
+			RTC_writeDate(&Struct_RTC_W);
+			timeout_Disable();
+
+		TermHandler_StateMachine.RTCBusy = FALSE;
+		TermHandler_StateMachine.LCDBusy = FALSE;
+		manual_mode = FALSE;
+
+
+		}
+
+	}
+
 }

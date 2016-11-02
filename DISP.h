@@ -29,4 +29,6 @@ void Info_Display(RTC_CharArray* info);
  */
 void Eco_Display(uint8 data);
 
+
+void Button_Display(RTC_CharArray* info);
 #endif /* SOURCES_DISP_H_ */

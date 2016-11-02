@@ -85,6 +85,8 @@ int main(void)
 	RTC_init();
     MEM_init();
 	TERMHANDLER_init();
+	BTTN_init();
+
     for (;;) {
     	TERM_upd();
     }

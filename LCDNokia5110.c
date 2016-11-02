@@ -160,13 +160,13 @@ void LCDNokia_writeByte(uint8 DataOrCmd, uint8 data)
 void LCDNokia_sendChar(uint8 character) {
   uint16 index = 0; 
 	
-  LCDNokia_writeByte(LCD_DATA, 0x00); //Blank vertical line padding
+  //LCDNokia_writeByte(LCD_DATA, 0x00); //Blank vertical line padding
 
   for (index = 0 ; index < 5 ; index++)
 	  LCDNokia_writeByte(LCD_DATA, ASCII[character - 0x20][index]);
     //0x20 is the ASCII character for Space (' '). The font table starts with this character
 
-  LCDNokia_writeByte(LCD_DATA, 0x00); //Blank vertical line padding
+  //LCDNokia_writeByte(LCD_DATA, 0x00); //Blank vertical line padding
 }
 
 void LCDNokia_sendString(uint8 *characters) {
