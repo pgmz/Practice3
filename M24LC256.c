@@ -12,8 +12,7 @@
 #include "DataTypeDefinitions.h"
 #include "GlobalFunctions.h"
 
-uint8 MEM_init(){
-	//I2C0, PB2 - SCL, PB3 - SDA
+void MEM_init(){
 	GPIO_clockGating(GPIOB);
 	GPIO_pinControlRegisterType pinControlRegister= GPIO_MUX2;
 	GPIO_pinControlRegister(GPIOB, BIT2, &pinControlRegister);

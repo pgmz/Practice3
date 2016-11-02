@@ -38,7 +38,7 @@
 #include "MCP7940M.h"
 #include "UART.h"
 
-
+/*Clear the display and write the time and date*/
 void Info_Display(RTC_CharArray info){
 	LCDNokia_clear();
 	LCDNokia_gotoXY(0,0);
@@ -47,6 +47,7 @@ void Info_Display(RTC_CharArray info){
 	LCDNokia_sendString(info.Date_Char);
 }
 
+/*Clear the display and write the eco from TeraTerm*/
 void Eco_Display(UART_ChannelType uartChannel){
 	LCDNokia_clear();
 	LCDNokia_gotoXY(0,0);

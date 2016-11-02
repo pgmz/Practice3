@@ -38,7 +38,7 @@
 #include "UART.h"
 #include "LCDNokia5110.h"
 #include "SPI.h"
-
+/*Set values to set up the SPI */
 const SPI_ConfigType SPI_Config={SPI_DISABLE_FIFO,
 							SPI_LOW_POLARITY,
 							SPI_LOW_PHASE,
@@ -56,13 +56,18 @@ int main(void)
     /* Write your code here */
 
 
-
+	/*Initializes the SPI*/
 	SPI_init(&SPI_Config);
+	/*Initializes LCD*/
 	LCDNokia_init();
+	/*Initializes the RTC*/
 	RTC_init();
+	/*Initializes the Memory*/
     MEM_init();
+	/*Initializes the SPI*/
 	TERMHANDLER_init();
     for (;;) {
+    	/*Update the time and date of the UART terminal, I2C terminal and LCD*/
     	TERM_upd();
     }
     /* Never leave main */

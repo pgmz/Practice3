@@ -16,20 +16,21 @@
 #include "DataTypeDefinitions.h"
 
 
-
+/* Constant that represent the activation of the master mode for the I2C  */
 #define I2C_MASTER_MODE	1
+/* Constant that represent the activation of the slave mode for the I2C  */
 #define I2C_SLAVE_MODE 0
-
+/* Constant that represent the activation of the receiver mode for the I2C  */
 #define I2C_RX_MODE 0
+/* Constant that represent the activation of the transmitter mode for the I2C  */
 #define I2C_TX_MODE 1
 
-//#define SYSTEM_CLOCK 110000000
+/* Constant that represent the value for the system clock  */
 #define SYSTEM_CLOCK 21000000
-/** Constant that represent the clock enable for GPIO A */
+/** Constant that represent the activation of the clock gating Channel 0 of the I2C*/
 #define I2C0_CLOCK_GATING 0x40
-/**
- * \brief This enum define the UART port to be used.
- */
+
+/* This definition is used to select and specify the channel of I2C that will be used */
 typedef enum {I2C_0, I2C_1, I2C_2}I2C_ChannelType;
 
 
