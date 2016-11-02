@@ -18,11 +18,11 @@
 #define MEM_CONTROL_W 0xA0
 #define MEM_CONTROL_R 0xA1
 
+
 uint8 MEM_init();
 
 uint8 MEM_write(uint16 address, char data);
 
 char MEM_read(uint16 address);
-
 
 #endif /* SOURCES_M24LC256_H_ */

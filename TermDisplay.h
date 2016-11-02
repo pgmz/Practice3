@@ -38,10 +38,17 @@ void TERM_communicationDisp(UART_ChannelType uartChannel);
 
 void TERM_lcdDisp(UART_ChannelType uartChannel);
 
+void TERM_ErrorDisp(UART_ChannelType uartChannel);
+void TERM_BusyDisp(UART_ChannelType uartChannel);
+
 void RTC_newRead();
 void RTC_changeFormat(uint8 format);
 
 void Date_Check(RTC_CharArray* struct_char ,RTC_ConfigType* struct_config);
 void Hour_Check(RTC_CharArray* struct_char ,RTC_ConfigType* struct_config);
+
+
+void Cast_Time(RTC_ConfigType* configRAW, RTC_CharArray* config);
+void Cast_Date(RTC_ConfigType* configRAW, RTC_CharArray* config);
 
 #endif /* SOURCES_TERMDISPLAY_H_ */

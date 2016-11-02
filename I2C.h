@@ -24,7 +24,8 @@
 #define I2C_TX_MODE 1
 
 //#define SYSTEM_CLOCK 110000000
-#define SYSTEM_CLOCK 21000000
+//#define SYSTEM_CLOCK 21000000
+#define SYSTEM_CLOCK 60000000
 /** Constant that represent the clock enable for GPIO A */
 #define I2C0_CLOCK_GATING 0x40
 /**

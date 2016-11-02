@@ -15,8 +15,8 @@
 #include "FIFO.h"
 
 //#define SYSTEM_CLOCK 110000000
-#define SYSTEM_CLOCK 21000000
-
+//#define SYSTEM_CLOCK 21000000
+#define SYSTEM_CLOCK 60000000
 typedef enum{
 	MenuDisp = 0,
 	ReadI2CDisp,
@@ -26,7 +26,8 @@ typedef enum{
 	SetHourFormatDisp,
 	ReadHourDisp,
 	ReadDateDisp,
-	CommunicationDisp
+	CommunicationDisp,
+	LCDDisp
 }Term_MenuDisplayType;
 
 typedef enum{
@@ -74,17 +75,17 @@ void TERM_UGLY_upd(UART_ChannelType uartChannel, Term_StateMachineType* statemac
 
 uint8 TERM_upd();
 
-void TERM_MenuDisp(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
-void TERM_ReadMem(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
-void TERM_WriteMem(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
-void TERM_WriteHour(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
-void TERM_WriteDate(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
-void TERM_WriteFormat(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
-void TERM_ReadHour(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
-void TERM_ReadDate(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
-void TERM_communication(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
-void TERM_LCD(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
+static void TERM_MenuDisp(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
+static void TERM_ReadMem(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
+static void TERM_WriteMem(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
+static void TERM_WriteHour(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
+static void TERM_WriteDate(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
+static void TERM_WriteFormat(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
+static void TERM_ReadHour(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
+static void TERM_ReadDate(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
+static void TERM_communication(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
+static void TERM_LCD(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
 
-void Cast_Memory_param(Term_StateMachineType* statemachine);
+static void Cast_Memory_param(Term_StateMachineType* statemachine);
 
 #endif /* SOURCES_TERMHANDLER_H_ */
