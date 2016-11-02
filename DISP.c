@@ -39,18 +39,15 @@
 #include "UART.h"
 
 /*Clear the display and write the time and date*/
-void Info_Display(RTC_CharArray info){
+void Info_Display(RTC_CharArray* info){
 	LCDNokia_clear();
 	LCDNokia_gotoXY(0,0);
-	LCDNokia_sendString(info.Time_Char);
+	LCDNokia_sendString(info->Time_Char);
 	LCDNokia_gotoXY(0,2);
-	LCDNokia_sendString(info.Date_Char);
+	LCDNokia_sendString(info->Date_Char);
 }
 
 /*Clear the display and write the eco from TeraTerm*/
-void Eco_Display(UART_ChannelType uartChannel){
-	LCDNokia_clear();
-	LCDNokia_gotoXY(0,0);
-	LCDNokia_sendString(UART_MailBoxData(uartChannel));
+void Eco_Display(uint8 data){
+	LCDNokia_sendChar(data);
 }
-

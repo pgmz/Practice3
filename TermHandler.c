@@ -11,6 +11,7 @@
 #include "TermDisplay.h"
 #include "PIT.h"
 #include "DISP.h"
+#include "LCDNokia5110.h"
 
 RTC_ConfigType Struct_RTC_W = {
 		6,
@@ -51,7 +52,7 @@ RTC_CharArray Struct_Char_R = {
 };
 
 ftpr_Disp ftpr_Disp_Array[20] = {
-		//////
+								//////
 		&TERM_menuDisp,			//0 //
 		&TERM_readI2CDisp1,		//1 //
 		&TERM_writeI2CDisp1,	//2 //
@@ -75,7 +76,7 @@ ftpr_Disp ftpr_Disp_Array[20] = {
 
 		&TERM_ErrorDisp,		//18//
 		&TERM_BusyDisp			//19//
-		//////
+								//////
 };
 
 ftpr_Update ftpr_Update_Array [10]= {
@@ -125,22 +126,25 @@ TermHandler_StateMachineType TermHandler_StateMachine = {
 
 
 static uint8 timeout_flag = FALSE;
-
+static uint8 timeout_notification = FALSE;
 
 uint8 TERM_upd(){
+
 	if(UART_MailBoxFlag(UART_0)){
-		TermHandler_StateMachine.id = '1';
-		(*ftpr_Update_Array[Term1_StateMachine.currentMenu])(UART_0, &Term1_StateMachine);
+	TermHandler_StateMachine.id = '1';
+	(*ftpr_Update_Array[Term1_StateMachine.currentMenu])(UART_0, &Term1_StateMachine);
+
 	}
 
 	if(UART_MailBoxFlag(UART_4)){
-		TermHandler_StateMachine.id = '2';
-		(*ftpr_Update_Array[Term2_StateMachine.currentMenu])(UART_4, &Term2_StateMachine);
+	TermHandler_StateMachine.id = '2';
+	(*ftpr_Update_Array[Term2_StateMachine.currentMenu])(UART_4, &Term2_StateMachine);
 	}
 
 	TermHandler_StateMachine.id = '0';
 
 	if(PIT_mailBoxFlag(PIT_0) == TRUE){
+
 		timeout_Enable();
 		while(I2C_busy(I2C_0) == TRUE);
 		RTC_newRead(&Struct_RTC_R, &Struct_Char_R);
@@ -155,7 +159,10 @@ uint8 TERM_upd(){
 		} else if((Term2_StateMachine.currentMenu == ReadDateDisp)){
 			(*ftpr_Disp_Array[17])(UART_4, &Struct_Char_R);
 		}
-		Info_Display(Struct_Char_R);
+
+		if(TermHandler_StateMachine.LCDBusy == FALSE){
+		Info_Display(&Struct_Char_R);
+		}
 	}
 }
 
@@ -254,17 +261,17 @@ void TERM_WriteMem(UART_ChannelType uartChannel, Term_StateMachineType* statemac
 			UART_putString(uartChannel, "\r\nSu texto ha sido guardado!\r\nPresione cualquier tecla para continuar");
 			statemachine->currentMenuParameter = Len_param;
 			statemachine->address = 0;
-			//what if we receive any other type of data
-		} else {
-			////
+		//what if we receive any other type of data
+			} else {
+				////
 
-			if(statemachine->address < 0x7FFF){
+				if(statemachine->address < 0x7FFF){
 				timeout_Enable();
 				MEM_write(statemachine->address, UART_MailBoxData(uartChannel));
 				timeout_Disable();
 				statemachine->address += 8;
+				}
 			}
-		}
 
 		break;
 
@@ -318,43 +325,43 @@ void TERM_WriteHour(UART_ChannelType uartChannel, Term_StateMachineType* statema
 
 void TERM_WriteDate(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
 	if(statemachine->shift_counter < 10){
-		Struct_Char_W.Date_Char[statemachine->shift_counter] =
-				(((UART_MailBoxData(uartChannel) - '0') >= 0)
-						&& ((UART_MailBoxData(uartChannel) - '0') <= 9) )?
-								((UART_MailBoxData(uartChannel))):((UART_MailBoxData(uartChannel) == '/')?
-										('/'):('1'));
-		statemachine->shift_counter++;
+			Struct_Char_W.Date_Char[statemachine->shift_counter] =
+					(((UART_MailBoxData(uartChannel) - '0') >= 0)
+							&& ((UART_MailBoxData(uartChannel) - '0') <= 9) )?
+									((UART_MailBoxData(uartChannel))):((UART_MailBoxData(uartChannel) == '/')?
+											('/'):('1'));
+			statemachine->shift_counter++;
 
-	} else if((UART_MailBoxData(uartChannel) == 13) && (statemachine->shift_counter == 10)){
-		UART_MailBoxData(uartChannel);
-		Struct_Char_W.Date_Char[2] = '/';
-		Struct_Char_W.Date_Char[5] = '/';
-		Date_Check(&Struct_Char_W ,&Struct_RTC_W);
+		} else if((UART_MailBoxData(uartChannel) == 13) && (statemachine->shift_counter == 10)){
+			UART_MailBoxData(uartChannel);
+			Struct_Char_W.Date_Char[2] = '/';
+			Struct_Char_W.Date_Char[5] = '/';
+			Date_Check(&Struct_Char_W ,&Struct_RTC_W);
 
-		timeout_Enable();
-		RTC_writeDate(&Struct_RTC_W);
-		timeout_Disable();
+			timeout_Enable();
+			RTC_writeDate(&Struct_RTC_W);
+			timeout_Disable();
 
-		Struct_Char_R.Date_Char[6] = Struct_Char_W.Date_Char[6];
-		Struct_Char_R.Date_Char[7] = Struct_Char_W.Date_Char[7];
+			Struct_Char_R.Date_Char[6] = Struct_Char_W.Date_Char[6];
+			Struct_Char_R.Date_Char[7] = Struct_Char_W.Date_Char[7];
 
-		(*ftpr_Disp_Array[15])(uartChannel, &Struct_Char_R);
+			(*ftpr_Disp_Array[15])(uartChannel, &Struct_Char_R);
 
-		statemachine->currentMenuParameter = Len_param;
+			statemachine->currentMenuParameter = Len_param;
 
-		return;
-	} else if(statemachine->currentMenuParameter == Len_param){
-		UART_MailBoxData(uartChannel);
-		statemachine->shift_counter = 0;
-		statemachine->currentMenu = MenuDisp;
-		statemachine->currentMenuParameter = Option_param;
-		(*ftpr_Disp_Array[statemachine->currentMenu])(uartChannel, &Struct_Char_R);
-		TermHandler_StateMachine.RTCBusy = FALSE;
+			return;
+		} else if(statemachine->currentMenuParameter == Len_param){
+			UART_MailBoxData(uartChannel);
+			statemachine->shift_counter = 0;
+			statemachine->currentMenu = MenuDisp;
+			statemachine->currentMenuParameter = Option_param;
+			(*ftpr_Disp_Array[statemachine->currentMenu])(uartChannel, &Struct_Char_R);
+			TermHandler_StateMachine.RTCBusy = FALSE;
 
-	} else {
-		UART_putString(uartChannel, "\r\nSe ha excedido del numero de caracteres,\r\n");
-		UART_putString(uartChannel, "se ignorara el utimo caracter ... (Presione ENTER)");
-	}
+		} else {
+			UART_putString(uartChannel, "\r\nSe ha excedido del numero de caracteres,\r\n");
+			UART_putString(uartChannel, "se ignorara el utimo caracter ... (Presione ENTER)");
+		}
 
 }
 void TERM_WriteFormat(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
@@ -371,46 +378,61 @@ void TERM_WriteFormat(UART_ChannelType uartChannel, Term_StateMachineType* state
 		statemachine->char_len[statemachine->shift_counter] = (UART_MailBoxData(uartChannel));
 		statemachine->shift_counter++;
 
-		if(statemachine->shift_counter == 2){
-			if((((statemachine->char_len[0] == 'S'))&&((statemachine->char_len[1] == 'i')))
-					||(((statemachine->char_len[0] == 's'))&&((statemachine->char_len[1] == 'i')))
-					||(((statemachine->char_len[0] == 'S'))&&((statemachine->char_len[1] == 'I')))){
+	if(statemachine->shift_counter == 2){
+		if((((statemachine->char_len[0] == 'S'))&&((statemachine->char_len[1] == 'i')))
+				||(((statemachine->char_len[0] == 's'))&&((statemachine->char_len[1] == 'i')))
+				||(((statemachine->char_len[0] == 'S'))&&((statemachine->char_len[1] == 'I')))){
 
 
-				Struct_RTC_W.format = (Struct_RTC_W.format == 1)?(FALSE):(TRUE);
-				RTC_changeFormat(&Struct_RTC_W);
+			Struct_RTC_W.format = (Struct_RTC_W.format == 1)?(FALSE):(TRUE);
+			RTC_changeFormat(&Struct_RTC_W);
 
-				timeout_Enable();
-				RTC_readHour(&Struct_RTC_R);
-				timeout_Disable();
+			timeout_Enable();
+		    RTC_readHour(&Struct_RTC_R);
+		    timeout_Disable();
 
-				UART_putString(uartChannel, "\r\nSe ha cambiado el formato, presione ENTER para continuar... \r\n");
+			UART_putString(uartChannel, "\r\nSe ha cambiado el formato, presione ENTER para continuar... \r\n");
 
-			} else if((((statemachine->char_len[0] == 'N'))&&((statemachine->char_len[1] == 'o')))
-					||(((statemachine->char_len[0] == 'n'))&&((statemachine->char_len[1] == 'o')))
-					||(((statemachine->char_len[0] == 'N'))&&((statemachine->char_len[1] == 'O')))){
+		} else if((((statemachine->char_len[0] == 'N'))&&((statemachine->char_len[1] == 'o')))
+				||(((statemachine->char_len[0] == 'n'))&&((statemachine->char_len[1] == 'o')))
+				||(((statemachine->char_len[0] == 'N'))&&((statemachine->char_len[1] == 'O')))){
 
-				UART_putString(uartChannel, "\r\n No se ha cambiado el formato, presione ENTER para continuar... \r\n");
+			UART_putString(uartChannel, "\r\n No se ha cambiado el formato, presione ENTER para continuar... \r\n");
 
-			}
+		}
 
 		}
 	}
 }
-
 void TERM_LCD(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
+
+	//What if [ESC]
 	if((UART_MailBoxData(uartChannel) == 27)){
-		statemachine->currentMenu = MenuDisp;
-		statemachine->currentMenuParameter = Option_param;
-		(*ftpr_Disp_Array[statemachine->currentMenu])(uartChannel, &Struct_Char_R);
-	}
 
-	else if ((UART_MailBoxData(uartChannel) == 13)){
-		if(TermHandler_StateMachine.Term2Com == TRUE && TermHandler_StateMachine.Term1Com == TRUE){
-			Eco_Display(uartChannel);
-		}
-	}
+					//go back to Main menu
+					statemachine->currentMenu = MenuDisp;
+					statemachine->currentMenuParameter = Option_param;
+					TermHandler_StateMachine.LCDBusy = FALSE;
+					(*ftpr_Disp_Array[statemachine->currentMenu])(uartChannel, &Struct_Char_R);
 
+
+	//what if [ENTER]
+				} else if ((UART_MailBoxData(uartChannel) == 13)){
+
+					LCDNokia_clear();
+
+					while(statemachine->f.tail != statemachine->f.head){
+
+						Eco_Display(FIFO_POP(&statemachine->f));
+
+					}
+					UART_putString(uartChannel,"\r\n... Presione ESC para salir\r\n");
+					FIFO_restart(&statemachine->f);
+
+	//what if we receive any other type of data
+				} else {
+					FIFO_PUSH(&statemachine->f,UART_MailBoxData(uartChannel));
+				}
 
 }
 
@@ -419,66 +441,66 @@ void TERM_communication(UART_ChannelType uartChannel, Term_StateMachineType* sta
 	//What if [ESC]
 	if((UART_MailBoxData(uartChannel) == 27)){
 
-		//go back to Main menu
-		statemachine->currentMenu = MenuDisp;
-		statemachine->currentMenuParameter = Option_param;
-		(*ftpr_Disp_Array[statemachine->currentMenu])(uartChannel, &Struct_Char_R);
+					//go back to Main menu
+					statemachine->currentMenu = MenuDisp;
+					statemachine->currentMenuParameter = Option_param;
+					(*ftpr_Disp_Array[statemachine->currentMenu])(uartChannel, &Struct_Char_R);
 
-		//If we are terminal 1 and terminal 2 is on, make ir know that we leave
-		if(statemachine->id == '1' && TermHandler_StateMachine.Term2Com == TRUE){
-			UART_putString(UART_4, "\r\nLa terminal 1 se ha desconectado ... [ESC] \r\n");
-			TermHandler_StateMachine.Term1Com = FALSE;
+					//If we are terminal 1 and terminal 2 is on, make ir know that we leave
+					if(statemachine->id == '1' && TermHandler_StateMachine.Term2Com == TRUE){
+						UART_putString(UART_4, "\r\nLa terminal 1 se ha desconectado ... [ESC] \r\n");
+						TermHandler_StateMachine.Term1Com = FALSE;
 
-			//If we are terminal 2 and terminal 1 is on, make it know that we leave
-		} else if(statemachine->id == '2' && TermHandler_StateMachine.Term1Com == TRUE){
-			UART_putString(UART_0, "\r\nLa terminal 2 se ha desconectado ... [ESC] \r\n");
-			TermHandler_StateMachine.Term2Com = FALSE;
-		}
-
-
-		//what if [ENTER]
-	} else if ((UART_MailBoxData(uartChannel) == 13)){
-
-		//if both terminals are on, write on them
-		if(TermHandler_StateMachine.Term2Com == TRUE && TermHandler_StateMachine.Term1Com == TRUE){
-			UART_putString(UART_0, "\r\nTerminal");
-			UART_putChar(UART_0, statemachine->id);
-			UART_putString(UART_0, ": ");
-
-			UART_putString(UART_4, "\r\nTerminal ");
-			UART_putChar(UART_4, statemachine->id);
-			UART_putString(UART_4, ": ");
-
-		} else {
-			UART_putString(uartChannel, "\r\nTerminal ");
-			UART_putChar(uartChannel, statemachine->id);
-			UART_putString(uartChannel, ": ");
-
-		}
-
-		while(statemachine->f.tail != statemachine->f.head){
-
-			//save data
-			char data = FIFO_POP(&statemachine->f);
+					//If we are terminal 2 and terminal 1 is on, make it know that we leave
+					} else if(statemachine->id == '2' && TermHandler_StateMachine.Term1Com == TRUE){
+						UART_putString(UART_0, "\r\nLa terminal 2 se ha desconectado ... [ESC] \r\n");
+						TermHandler_StateMachine.Term2Com = FALSE;
+					}
 
 
-			//if both terminals are on, write on them
-			if(TermHandler_StateMachine.Term2Com == TRUE && TermHandler_StateMachine.Term1Com == TRUE){
-				UART_putChar(UART_0, data);
-				UART_putChar(UART_4, data);
+	//what if [ENTER]
+				} else if ((UART_MailBoxData(uartChannel) == 13)){
 
-				//if not, just write in '''''local'''''
-			} else {
-				UART_putChar(uartChannel, data);
-			}
-		}
-		UART_putString(uartChannel," [ENTER]\r\n");
-		FIFO_restart(&statemachine->f);
+					//if both terminals are on, write on them
+					if(TermHandler_StateMachine.Term2Com == TRUE && TermHandler_StateMachine.Term1Com == TRUE){
+						UART_putString(UART_0, "\r\nTerminal");
+						UART_putChar(UART_0, statemachine->id);
+						UART_putString(UART_0, ": ");
 
-		//what if we receive any other type of data
-	} else {
-		FIFO_PUSH(&statemachine->f,UART_MailBoxData(uartChannel));
-	}
+						UART_putString(UART_4, "\r\nTerminal ");
+						UART_putChar(UART_4, statemachine->id);
+						UART_putString(UART_4, ": ");
+
+					} else {
+						UART_putString(uartChannel, "\r\nTerminal ");
+						UART_putChar(uartChannel, statemachine->id);
+						UART_putString(uartChannel, ": ");
+
+					}
+
+					while(statemachine->f.tail != statemachine->f.head){
+
+						//save data
+						char data = FIFO_POP(&statemachine->f);
+
+
+						//if both terminals are on, write on them
+						if(TermHandler_StateMachine.Term2Com == TRUE && TermHandler_StateMachine.Term1Com == TRUE){
+							UART_putChar(UART_0, data);
+							UART_putChar(UART_4, data);
+
+						//if not, just write in '''''local'''''
+						} else {
+							UART_putChar(uartChannel, data);
+						}
+					}
+					UART_putString(uartChannel,"\r\n[ENTER]\r\n");
+					FIFO_restart(&statemachine->f);
+
+	//what if we receive any other type of data
+				} else {
+					FIFO_PUSH(&statemachine->f,UART_MailBoxData(uartChannel));
+				}
 }
 
 void TERM_ReadDate(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
@@ -526,45 +548,45 @@ void TERM_MenuDisp(UART_ChannelType uartChannel, Term_StateMachineType* statemac
 	}
 
 	if(((statemachine->currentMenu >= SetHourDisp
-			&& statemachine->currentMenu <= ReadDateDisp))){
+						&& statemachine->currentMenu <= ReadDateDisp))){
 
 		TermHandler_StateMachine.RTCBusy = TRUE;
 
 	}
 
 	if(((statemachine->currentMenu >= ReadI2CDisp
-			&& statemachine->currentMenu <= WriteI2CDisp))){
+							&& statemachine->currentMenu <= WriteI2CDisp))){
 
-		TermHandler_StateMachine.MemBusy = TRUE;
-	}
+			TermHandler_StateMachine.MemBusy = TRUE;
+			}
 
 	if((statemachine->currentMenu == LCDDisp)){
 
-		TermHandler_StateMachine.LCDBusy = TRUE;
-	}
+			TermHandler_StateMachine.LCDBusy = TRUE;
+			}
 
 	(*ftpr_Disp_Array[statemachine->currentMenu])(uartChannel, &Struct_Char_R);
 
 	if(statemachine->currentMenu == CommunicationDisp){
-		switch(statemachine->id){
-		case '1':
-			TermHandler_StateMachine.Term1Com = TRUE;
-			if(TermHandler_StateMachine.Term2Com){
-				UART_putString(UART_4, "\r\nLa terminal 1 se ha conectado ... \r\n");
-				UART_putString(UART_0, "\r\nLa terminal 2 estï¿½ conectada ... \r\n");
+	switch(statemachine->id){
+				case '1':
+					TermHandler_StateMachine.Term1Com = TRUE;
+					if(TermHandler_StateMachine.Term2Com){
+					UART_putString(UART_4, "\r\nLa terminal 1 se ha conectado ... \r\n");
+					UART_putString(UART_0, "\r\nLa terminal 2 está conectada ... \r\n");
 
 
-			}
-			break;
+					}
+					break;
 
-		case '2':
-			TermHandler_StateMachine.Term2Com = TRUE;
-			if(TermHandler_StateMachine.Term1Com){
-				UART_putString(UART_4, "\r\nLa terminal 1 estï¿½ conectada ... \r\n");
-				UART_putString(UART_0, "\r\nLa terminal 2 se ha conectado ... \r\n");
-			}
-			break;
-		}
+				case '2':
+					TermHandler_StateMachine.Term2Com = TRUE;
+					if(TermHandler_StateMachine.Term1Com){
+					UART_putString(UART_4, "\r\nLa terminal 1 está conectada ... \r\n");
+					UART_putString(UART_0, "\r\nLa terminal 2 se ha conectado ... \r\n");
+					}
+					break;
+				}
 	}
 
 }
@@ -598,12 +620,12 @@ uint8 TERM2_init(){
 void Cast_Memory_param(Term_StateMachineType* statemachine){
 	statemachine->address = 0;
 	for(uint8 i=0;i<4;i++){
-		statemachine->address |= ((((statemachine->char_address[i] - '0')>= 0) &&
-				((statemachine->char_address[i] - '0') <= 9))?
-						((statemachine->char_address[i] - '0'))
-						:((((statemachine->char_address[i] - 'A')>= 0xA) &&
-								((statemachine->char_address[i] - 'A') <= 0xF))?
-										((statemachine->char_address[i] - 'A')):(0))) << (3-i)*4;
+	statemachine->address |= ((((statemachine->char_address[i] - '0')>= 0) &&
+			((statemachine->char_address[i] - '0') <= 9))?
+					((statemachine->char_address[i] - '0'))
+					:((((statemachine->char_address[i] - 'A')>= 0xA) &&
+							((statemachine->char_address[i] - 'A') <= 0xF))?
+									((statemachine->char_address[i] - 'A')):(0))) << (3-i)*4;
 
 	}
 
@@ -659,8 +681,8 @@ void timeout_Disable(){
 	if(timeout_flag == TRUE){
 		timeout_flag = FALSE;
 
-		if((Term1_StateMachine.currentMenu != CommunicationDisp)
-				&&(Term1_StateMachine.currentMenu != LCDDisp)){
+		if(((Term1_StateMachine.currentMenu != CommunicationDisp)
+				&&(Term1_StateMachine.currentMenu != LCDDisp))){
 			Term1_StateMachine.currentMenu = MenuDisp;
 			Term1_StateMachine.currentMenuParameter = Option_param;
 
@@ -669,8 +691,8 @@ void timeout_Disable(){
 
 		}
 
-		if((Term2_StateMachine.currentMenu != CommunicationDisp)
-				&&(Term2_StateMachine.currentMenu != LCDDisp)){
+		if(((Term2_StateMachine.currentMenu != CommunicationDisp)
+				&&(Term2_StateMachine.currentMenu != LCDDisp))){
 			Term2_StateMachine.currentMenu = MenuDisp;
 			Term2_StateMachine.currentMenuParameter = Option_param;
 
@@ -678,18 +700,22 @@ void timeout_Disable(){
 			(*ftpr_Disp_Array[18])(UART_4, &Struct_Char_W);
 		}
 
-	}
-
-	if(Term1_StateMachine.currentMenu == MenuDisp){
-		(*ftpr_Disp_Array[Term1_StateMachine.currentMenu])(UART_0, &Struct_Char_W);
+		timeout_notification = TRUE;
 
 	}
 
-	if(Term2_StateMachine.currentMenu == MenuDisp){
+	if((Term1_StateMachine.currentMenu == MenuDisp) && (timeout_notification == FALSE)){
+				(*ftpr_Disp_Array[Term1_StateMachine.currentMenu])(UART_0, &Struct_Char_W);
 
-		(*ftpr_Disp_Array[Term2_StateMachine.currentMenu])(UART_4, &Struct_Char_W);
+			}
 
-	}
+			if((Term2_StateMachine.currentMenu == MenuDisp) && (timeout_notification == FALSE)){
+
+				(*ftpr_Disp_Array[Term2_StateMachine.currentMenu])(UART_4, &Struct_Char_W);
+
+				timeout_notification = TRUE;
+
+			}
 
 	PIT_timerDisable(PIT_1);
 	timeout_flag = FALSE;

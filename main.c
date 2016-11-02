@@ -35,10 +35,10 @@
 #include "TermHandler.h"
 #include "M24LC256.h"
 #include "GlobalFunctions.h"
+#include "LCDNokia5110.h"
 #include "UART.h"
 #include "MCG.h"
 #include "SPI.h"
-#include "LCDNokia5110.h"
 
 #define CLK_FREQ_HZ 50000000  /* CLKIN0 frequency */
 #define SLOW_IRC_FREQ 32768	/*This is the approximate value for the slow irc*/
@@ -53,28 +53,16 @@
 #define PLL0_PRDIV 25    /* PLL predivider value */
 #define PLL0_VDIV 30    /* PLL multiplier value*/
 
-
-/**
- * Constant structure for initiazing the SPI
- * **/
-const SPI_ConfigType SPI_Config={
-							/*Sets the values or parameters that enables
-							 * the SPI with the desired characteristics*/
-							SPI_DISABLE_FIFO,
-							SPI_LOW_POLARITY,
-							SPI_LOW_PHASE,
-							SPI_MSB,
-							/*Use SPI0*/
-							SPI_0,
-							/*Set this SPI as MASTER*/
-							SPI_MASTER,
-							/*Sets the used pin as MUX2*/
-							GPIO_MUX2,
-							/*Set baudrate and framesize*/
-							SPI_BAUD_RATE_2,
-							SPI_FSIZE_8,
-							/*Sets this pins as the ones that will be used*/
-							{GPIOD,BIT1,BIT2}};
+const SPI_ConfigType SPI_Config={SPI_DISABLE_FIFO,
+ 							SPI_LOW_POLARITY,
+ 							SPI_LOW_PHASE,
+ 							SPI_MSB,
+ 							SPI_0,
+ 							SPI_MASTER,
+ 							GPIO_MUX2,
+ 							SPI_BAUD_RATE_6,
+ 							SPI_FSIZE_8,
+ 							{GPIOD,BIT1,BIT2}};
 
 
 int main(void)
@@ -91,10 +79,11 @@ int main(void)
 	mcg_clk_hz = pbe_pee(CLK_FREQ_HZ); // 117.18 kHz -> 60000000 Hz
 
     /* Write your code here */
+
+	SPI_init(&SPI_Config);
+	LCDNokia_init();
 	RTC_init();
     MEM_init();
-	SPI_init(&SPI_Config); /*! Configuration function for the LCD port*/
-	LCDNokia_init();
 	TERMHANDLER_init();
     for (;;) {
     	TERM_upd();
