@@ -1,30 +1,25 @@
 /*
  * I2C.c
  *
+ *	This file is the device driver of the I2C,
+ *	has the basic functions to operate I2C, in
+ *	the K64F, such as start, stop, writeByte, etc.
+ *
  *  Created on: 20/10/2016
  *      Author: Patricio Gomez
  */
-/*
- * I2C.c
- *
- *  Created on: 20/10/2016
- *      Author: Laplace´s Demon
- */
+
 
 #include "DataTypeDefinitions.h"
 #include "GlobalFunctions.h"
 #include "MK64F12.h"
 #include "I2c.h"
 
-uint8 I2C0_stopFaultDetectFlag = 0;
-uint8 I2C1_stopFaultDetectFlag = 0;
-uint8 I2C2_stopFaultDetectFlag = 0;
 
 void I2C0_IRQHandler(){
 	if((I2C0_FLT & I2C_FLT_STOPF_MASK) != 0){
 		I2C0_FLT |= I2C_FLT_STOPF_MASK;
 		I2C0_S &= ~I2C_S_IICIF_MASK;
-		I2C0_stopFaultDetectFlag = TRUE;
 	}
 }
 
@@ -32,7 +27,6 @@ void I2C1_IRQHandler(){
 	if((I2C1_FLT & I2C_FLT_STOPF_MASK) != 0){
 		I2C1_FLT |= I2C_FLT_STOPF_MASK;
 		I2C1_S &= ~I2C_S_IICIF_MASK;
-		I2C1_stopFaultDetectFlag = TRUE;
 	}
 }
 
@@ -40,45 +34,25 @@ void I2C2_IRQHandler(){
 	if((I2C1_FLT & I2C_FLT_STOPF_MASK) != 0){
 		I2C1_FLT |= I2C_FLT_STOPF_MASK;
 		I2C1_S &= ~I2C_S_IICIF_MASK;
-		I2C1_stopFaultDetectFlag = TRUE;
 	}
 }
-/********************************************************************************************/
-/********************************************************************************************/
-/********************************************************************************************/
-/*!
-  	 \brief
-  	 	 Configures the I2C port based on the input parameters.
-  	 	 Also, internally this function configures the GPIO, pin control register and clock gating, to be used as I2C.
-  	 	 It is recommended to use pin 2 and 3 of GPIOB.
-  	 \param[in] channel It is the channel to be used.
-  	 \param[in] systemClock Frequency of the system.
-  	 \param[in] baudRate baud rate between MCU and I2C device.
-  	 \return void
-
- */
 
 void I2C_init(I2C_ChannelType channel, uint32 systemClock, uint8 baudRate){
 	switch(channel){
 	case I2C_0:
 		SIM->SCGC4 |= SIM_SCGC4_I2C0_MASK;
 		I2C0_F = 0x56;
-		//0x56 disque, 100k
-		//0xE disque, 400k
-		//0x8c disque, 9600
-		//0x14 sabe!!
 		I2C0_C1 |= I2C_C1_IICEN_MASK;
-		//I2C0_SMB |= I2C_SMB_FACK_MASK;
 		break;
 	case I2C_1:
 		SIM->SCGC4 |= SIM_SCGC4_I2C1_MASK;
-		I2C1_F = 0x14;
+		I2C1_F = 0x56;
 		I2C1_C1 |= I2C_C1_IICEN_MASK;
 		break;
 
 	case I2C_2:		
 		SIM->SCGC1 |= SIM_SCGC1_I2C2_MASK; 
-		I2C2_F = 0x14;
+		I2C2_F = 0x56;
 		I2C2_C1 |= I2C_C1_IICEN_MASK;
 		break;
 
@@ -440,31 +414,6 @@ void I2C_stop(I2C_ChannelType channel){
 		case I2C_2:
 			I2C2_C1 &= ~I2C_C1_MST_MASK;
 			break;
-
-		default:
-			break;
-
-		}
-}
-
-
-uint8 I2C_stopFaultDetectFlag(I2C_ChannelType channel){
-	uint8 temp;
-	switch(channel){
-		case I2C_0:
-			temp = I2C0_stopFaultDetectFlag;
-			I2C0_stopFaultDetectFlag = FALSE;
-			return temp;
-
-		case I2C_1:
-			temp = I2C1_stopFaultDetectFlag;
-			I2C1_stopFaultDetectFlag = FALSE;
-			return temp;
-
-		case I2C_2:
-			temp = I2C2_stopFaultDetectFlag;
-			I2C2_stopFaultDetectFlag = FALSE;
-			return temp;
 
 		default:
 			break;

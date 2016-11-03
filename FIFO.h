@@ -1,6 +1,9 @@
 /*
  * FIFO.h
  *
+ * This functions, lets the user have a FIFO, that has the basic
+ * utilities, like PUSH or POP of MAX_BUFF chars.
+ *
  *  Created on: 30/10/2016
  *      Author: Patricio Gomez
  */
@@ -10,11 +13,13 @@
 
 #include "DataTypeDefinitions.h"
 
+#define MAX_BUFF 50
+
 /**typedef struct for a FIFO*/
 typedef struct {
 	/**Buffer of 50 characters, that will be stored
 	 * in the FIFO*/
-	char buff [50];
+	char buff [MAX_BUFF];
 	/**Index of head*/
 	uint8 head;
 	/**Index of tail*/

@@ -1,6 +1,9 @@
 /*
  * BTTN.h
  *
+ *	Button file, receives the Buttons interruptions, and initializes the
+ *	ports in order to receive the data form buttons,
+ *
  *  Created on: 08/10/2016
  *      Author: Patricio Gomez
  */

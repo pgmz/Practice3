@@ -1,6 +1,9 @@
 /*
  * FIFO.c
  *
+ * This functions, lets the user have a FIFO, that has the basic
+ * utilities, like PUSH or POP of MAX_BUFF chars.
+ *
  *  Created on: 30/10/2016
  *      Author: Patricio Gomez
  */
@@ -11,7 +14,7 @@
 uint8 FIFO_PUSH(FIFO_Type* f, char data){
 
 	/** If the tail is not the edge (FIFO is full), return 0*/
-	if(f->tail >= 49){
+	if(f->tail >= (MAX_BUFF-1)){
 		return FALSE;
 	} else {
 		/** If FIFO is not full, store in the buffer, at the tail index, the data*/

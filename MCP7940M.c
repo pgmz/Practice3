@@ -1,7 +1,12 @@
-
 /*
  * MCP7940M.c
  *
+ *	This file is a device driver for the MCP7940M integrated,
+ *	that includes the functions needed for writing and reading
+ *	the RTC. Includes I2C functions.
+ *
+ *	Has functions that write or read the 'full hour' (hour, minutes, seconds)
+ * 	or date (day, month, year)
  *  Created on: 20/10/2016
  *      Author: Patricio Gomez
  */

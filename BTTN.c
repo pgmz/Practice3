@@ -1,9 +1,13 @@
 /*
  * BTTN.c
  *
+ *	Button file, receives the Buttons interruptions, and initializes the
+ *	ports in order to receive the data form buttons,
+ *
  *  Created on: 08/10/2016
  *      Author: Patricio Gomez
  */
+
 
 #include "BTTN.h"
 #include "NVIC.h"
@@ -54,7 +58,7 @@ void PORTC_IRQHandler(){
 	/*Clear the interruption flags*/
 	GPIO_clearInterrupt(GPIOC);
 	/*Digital Debouncer*/
-	delay(100);
+	delay(250);
 }
 
 /*return the flag*/

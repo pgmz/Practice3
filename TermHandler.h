@@ -1,6 +1,10 @@
 /*
  * TermHandler.h
  *
+ *	This function is the main file that is in charge of the system update,
+ *	The functions of each menu, and the conditionals to verify that the
+ *	options selected are right
+ *
  *  Created on: 21/10/2016
  *      Author: Patricio Gomez
  */
@@ -78,8 +82,7 @@ typedef void (*ftpr_Update)(UART_ChannelType, Term_StateMachineType*);
 /*
 /*!
  	 \brief		This function enable the interrupt for for the PIT0 and PIT1 and set their prioryties, enable the clockgating and
- 				the PITÂ´s channels. Initializes the terminal 1 (PC-TeraTerm) and terminal 2 (Bluetooth-SenaTerm).
-
+ 				the PIT´s channels. Initializes the terminal 1 (PC-TeraTerm) and terminal 2 (Bluetooth-SenaTerm).
  	 \return 	uint8 return true when the fucntion ends.
  */
 uint8 TERMHANDLER_init();
@@ -88,7 +91,6 @@ uint8 TERMHANDLER_init();
 /*!
  	 \brief		This function configure the pins 16 and 17 of the port B, enable the UART Channel 0 and activate the the interruption
  	  	  	  	and set priority
-
  	 \return 	uint8 return true when the fucntion ends.
  */
 uint8 TERM1_init();
@@ -97,7 +99,6 @@ uint8 TERM1_init();
 /*!
  	 \brief		This function configure the pins 14 and 15 of the port C, enable the UART Channel 4 and activate the the interruption
  	 	 		and set priority
-
  	 \return 	uint8 return true when the fucntion ends.
  */
 
@@ -107,7 +108,6 @@ uint8 TERM2_init();
 /*!
  	 \brief		This function configure the pins 14 and 15 of the port C, enable the UART Channel 4 and activate the the interruption
  	  	  	  	and set priority
-
  	 \return 	uint8 return true when the fucntion ends.
  */
 
@@ -115,7 +115,6 @@ uint8 TERM2_init();
 /*
 /*!
  	 \brief		This function refresh the the information of the arrays of char, refresh the the time and date for the dispay
-
  	 \return 	uint8 return true when the fucntion ends.
  */
 uint8 TERM_upd();
@@ -126,7 +125,6 @@ uint8 TERM_upd();
  	  	  	  	and date
  	 \param[in] uartChannel to configurates the channels of the UART, statemachine to know what position it is the program and what is
  	 	 	 	the next step
-
  	 \return 	void
  */
 static void TERM_MenuDisp(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
@@ -136,7 +134,6 @@ static void TERM_MenuDisp(UART_ChannelType uartChannel, Term_StateMachineType* s
  	  	  	  	for address and get the data that is storage there and its size.
  	 \param[in] uartChannel to configurates the channels of the UART, statemachine to know what position it is the program and what is
  	 	 	 	the next step
-
  	 \return 	void
  */
 static void TERM_ReadMem(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
@@ -146,7 +143,6 @@ static void TERM_ReadMem(UART_ChannelType uartChannel, Term_StateMachineType* st
  	  	  	  	for address and wait until the user writes what data is going to be saved in address
  	 \param[in] uartChannel to configurates the channels of the UART, statemachine to know what position it is the program and what
  	 	 	 	is the next step
-
  	 \return 	void
 */
 static void TERM_WriteMem(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
@@ -156,7 +152,6 @@ static void TERM_WriteMem(UART_ChannelType uartChannel, Term_StateMachineType* s
  	 	 	 	time
  	 \param[in] uartChannel to configurates the channels of the UART, statemachine to know what position it is the program and what is
  	 	 	 	the next step
-
  	 \return 	void
  */
 static void TERM_WriteHour(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
@@ -166,7 +161,6 @@ static void TERM_WriteHour(UART_ChannelType uartChannel, Term_StateMachineType* 
  	 	 	 	date
  	 \param[in] uartChannel to configurates the channels of the UART, statemachine to know what position it is the program and what is
  	 	 	 	the next step
-
  	 \return 	void
 */
 static void TERM_WriteDate(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
@@ -176,7 +170,6 @@ static void TERM_WriteDate(UART_ChannelType uartChannel, Term_StateMachineType* 
  	 	 	 	time
  	 \param[in] uartChannel to configurates the channels of the UART, statemachine to know what position it is the program and what is
  	  			the next step
-
  	 \return 	void
  */
 static void TERM_WriteFormat(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
@@ -185,7 +178,6 @@ static void TERM_WriteFormat(UART_ChannelType uartChannel, Term_StateMachineType
  	 \brief		This function send the array of char of time by the UART channel selected
  	 \param[in] uartChannel to configurates the channels of the UART, statemachine to know what position it is the program and what is
  	 	 	 	the next step
-
  	 \return 	void
  */
 static void TERM_ReadHour(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
@@ -194,7 +186,6 @@ static void TERM_ReadHour(UART_ChannelType uartChannel, Term_StateMachineType* s
  	 \brief		This function send the array of char of date by the UART channel selected
  	 \param[in] uartChannel to configurates the channels of the UART, statemachine to know what position it is the program and what is
  	 	 	 	the next step
-
  	 \return 	void
  */
 static void TERM_ReadDate(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
@@ -203,7 +194,6 @@ static void TERM_ReadDate(UART_ChannelType uartChannel, Term_StateMachineType* s
  	 \brief		This function make posible the comunication between terminal 1 and terminal 2
  	 \param[in] uartChannel to configurates the channels of the UART, statemachine to know what position it is the program and what is
  	 	 	 	the next step
-
  	 \return 	void
  */
 static void TERM_communication(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
@@ -212,7 +202,6 @@ static void TERM_communication(UART_ChannelType uartChannel, Term_StateMachineTy
  	 \brief		This function send the data written interminal 1 or 2 to the display
  	 \param[in] uartChannel to configurates the channels of the UART, statemachine to know what position it is the program and what is
  	 	 	 	the next step
-
  	 \return 	void
  */
 static void TERM_LCD(UART_ChannelType uartChannel, Term_StateMachineType* statemachine);
@@ -220,28 +209,24 @@ static void TERM_LCD(UART_ChannelType uartChannel, Term_StateMachineType* statem
 /*!
  	 \brief		This function change the data recived as a string of chars to a uint16
  	 \param[in] statemachine to know what position it is the program and what is the next step
-
  	 \return 	void
  */
 static void Cast_Memory_param(Term_StateMachineType* statemachine);
 /*
 /*!
  	 \brief		Desactivate the interruption of timer of the channel pit 1
-
  	 \return 	void
  */
 void timeout_Ocurred();
 /*
 /*!
  	 \brief		Activate the interruption of  the timer of the channel pit 1
-
  	 \return 	void
  */
 void timeout_Enable();
 /*
 /*!
  	 \brief		Restart the value of the state machine
-
  	 \return 	void
  */
 
@@ -249,10 +234,16 @@ void timeout_Disable();
 /*
 /*!
  	 \brief		Activate the interruption of  the timer of the channel pit 1
-
  	 \return 	uint8 return the value of the macro declared
  */
 uint8 timeout_Flag();
 
+/*
+/*!
+ 	 \brief		Function that checks the buttons and the manual setting of
+ 	 	 	 	 hour and date
+ 	 \return 	void
+ */
+void Button_Hour();
 
 #endif /* SOURCES_TERMHANDLER_H_ */

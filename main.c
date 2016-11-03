@@ -39,6 +39,7 @@
 #include "UART.h"
 #include "MCG.h"
 #include "SPI.h"
+#include "BTTN.h"
 
 #define CLK_FREQ_HZ 50000000  /* CLKIN0 frequency */
 #define SLOW_IRC_FREQ 32768	/*This is the approximate value for the slow irc*/
@@ -69,6 +70,7 @@ int main(void)
 {
 
 
+	/** Configuration needed to run the Kinetis to 60MHz*/
 
 	int mcg_clk_hz;
 	unsigned char modeMCG = 0;
@@ -80,12 +82,21 @@ int main(void)
 
     /* Write your code here */
 
+	/** Initialize the SPI*/
 	SPI_init(&SPI_Config);
+	/** Initialize LCD Nokia*/
 	LCDNokia_init();
+	/** RTC initialize*/
 	RTC_init();
+	/** MEM initialize*/
     MEM_init();
+    /** TERM handler initialize*/
 	TERMHANDLER_init();
+	/** Buttons initialize*/
+	BTTN_init();
+
     for (;;) {
+    	/** Update the system*/
     	TERM_upd();
     }
     /* Never leave main */

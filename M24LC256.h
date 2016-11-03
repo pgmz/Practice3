@@ -1,5 +1,9 @@
 /*
- * MCP7940M.h
+ * M24LC256.h
+ *
+ *	This file is a device driver for the 24LC256 integrated,
+ *	that includes the functions needed for writing and reading
+ *	the memory. Includes I2C functions
  *
  *  Created on: 20/10/2016
  *      Author: Patricio Gomez

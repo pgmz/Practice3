@@ -1,6 +1,10 @@
 /*
  * TermDisplay.c
  *
+ *	This file has all the "graphic" part of the UART for sending stuff.
+ *	Has the strings in order to display the menus, and do the RTC read
+ *	data transformation, for displaying
+ *
  *  Created on: 30/10/2016
  *      Author: Patricio Gomez
  */
