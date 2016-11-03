@@ -12,8 +12,8 @@
 #include "PIT.h"
 #include "DISP.h"
 #include "LCDNokia5110.h"
-#include "BTTN.h"
 
+/*Set the value for Time and Date to write */
 RTC_ConfigType Struct_RTC_W = {
 		6,
 		41,
@@ -24,7 +24,7 @@ RTC_ConfigType Struct_RTC_W = {
 		17,
 		16
 };
-
+/*Set the value for Time and Date to read */
 RTC_ConfigType Struct_RTC_R = {
 		6,
 		41,
@@ -35,7 +35,7 @@ RTC_ConfigType Struct_RTC_R = {
 		17,
 		16
 };
-
+/*Set the value of the string of char for time and date to write*/
 RTC_CharArray Struct_Char_W = {
 		"00:00:00 AM",
 		"\0",
@@ -43,7 +43,7 @@ RTC_CharArray Struct_Char_W = {
 		"\0",
 		1
 };
-
+/*Set the value of the string of char for time and date to read*/
 RTC_CharArray Struct_Char_R = {
 		"00:00:00 AM",
 		"\0",
@@ -51,7 +51,7 @@ RTC_CharArray Struct_Char_R = {
 		"\0",
 		1
 };
-
+/*Set array of function pointer that prints information for the UART*/
 ftpr_Disp ftpr_Disp_Array[20] = {
 								//////
 		&TERM_menuDisp,			//0 //
@@ -79,7 +79,7 @@ ftpr_Disp ftpr_Disp_Array[20] = {
 		&TERM_BusyDisp			//19//
 								//////
 };
-
+/*Set array of function pointer that modify the information*/
 ftpr_Update ftpr_Update_Array [10]= {
 		&TERM_MenuDisp,
 		&TERM_ReadMem,
@@ -92,7 +92,7 @@ ftpr_Update ftpr_Update_Array [10]= {
 		&TERM_communication,
 		&TERM_LCD
 };
-
+/* Set the value to start the state machine for terminal 1*/
 Term_StateMachineType Term1_StateMachine = {
 		'1',
 		MenuDisp,
@@ -106,7 +106,7 @@ Term_StateMachineType Term1_StateMachine = {
 		0,
 		{{},0,0}
 };
-
+/* Set the value to start the state machine for terminal 2*/
 Term_StateMachineType Term2_StateMachine = {
 		'2',
 		MenuDisp,
@@ -121,25 +121,24 @@ Term_StateMachineType Term2_StateMachine = {
 		{{},0,0}
 };
 
+/* Set the value to start the state machine for the terminal handler*/
 TermHandler_StateMachineType TermHandler_StateMachine = {
 		FALSE, FALSE, FALSE, FALSE, FALSE
 };
 
-
+/* Set the value of the flag*/
 static uint8 timeout_flag = FALSE;
+/* Set the value ofn the flag*/
 static uint8 timeout_notification = FALSE;
-static uint8 manual_mode = FALSE;
-static uint8 manual_counter_hour = FALSE;
-static uint8 manual_counter_date = FALSE;
 
 uint8 TERM_upd(){
-
+	/* Verify the flag of the mailbox of the channel 0 of the UART*/
 	if(UART_MailBoxFlag(UART_0)){
 	TermHandler_StateMachine.id = '1';
 	(*ftpr_Update_Array[Term1_StateMachine.currentMenu])(UART_0, &Term1_StateMachine);
 
 	}
-
+	/* Verify the flag of the mailbox of the channel 4 of the UART*/
 	if(UART_MailBoxFlag(UART_4)){
 	TermHandler_StateMachine.id = '2';
 	(*ftpr_Update_Array[Term2_StateMachine.currentMenu])(UART_4, &Term2_StateMachine);
@@ -147,35 +146,42 @@ uint8 TERM_upd(){
 
 	TermHandler_StateMachine.id = '0';
 
+	/* Verify the flag of the mailbox of the channel 0 of the PIT*/
 	if(PIT_mailBoxFlag(PIT_0) == TRUE){
 
 		timeout_Enable();
+		/* Wait until the bus of the channel 0 of the I2C is busy*/
 		while(I2C_busy(I2C_0) == TRUE);
 		RTC_newRead(&Struct_RTC_R, &Struct_Char_R);
 		timeout_Disable();
+		/* Verify the position of the state machine of the terminal 1*/
 		if((Term1_StateMachine.currentMenu == ReadHourDisp)){
+			/*Read the value of the time*/
 			(*ftpr_Disp_Array[16])(UART_0, &Struct_Char_R);
+			/* Verify the position of the state machine of the terminal 1*/
 		} else if((Term1_StateMachine.currentMenu == ReadDateDisp)){
+			/*Read the value of the date*/
 			(*ftpr_Disp_Array[17])(UART_0, &Struct_Char_R);
 		}
+		/* Verify the position of the state machine of the terminal 2*/
 		if((Term2_StateMachine.currentMenu == ReadHourDisp)){
+			/*Read the value of the time*/
 			(*ftpr_Disp_Array[16])(UART_4, &Struct_Char_R);
+			/* Verify the position of the state machine of the terminal 2*/
 		} else if((Term2_StateMachine.currentMenu == ReadDateDisp)){
+			/*Read the value of the date*/
 			(*ftpr_Disp_Array[17])(UART_4, &Struct_Char_R);
 		}
 
-		if((TermHandler_StateMachine.LCDBusy == FALSE) && (manual_mode == FALSE)){
+		if(TermHandler_StateMachine.LCDBusy == FALSE){
 		Info_Display(&Struct_Char_R);
 		}
 	}
-
-	if(BTTN_mailBoxFlag() == TRUE){
-		Button_Hour();
-	}
 }
 
-
+/*Read the data of the addres*/
 void TERM_ReadMem(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
+	/* Read what the user write and decide what to do */
 	switch(statemachine->currentMenuParameter){
 	case Option_param:
 
@@ -238,8 +244,10 @@ void TERM_ReadMem(UART_ChannelType uartChannel, Term_StateMachineType* statemach
 		break;
 	}
 }
-void TERM_WriteMem(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
 
+/*Write the data of the address selected */
+void TERM_WriteMem(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
+	/* Decide what to do depending of the positionof the state machine*/
 	switch(statemachine->currentMenuParameter){
 	case Option_param:
 
@@ -293,7 +301,7 @@ void TERM_WriteMem(UART_ChannelType uartChannel, Term_StateMachineType* statemac
 		break;
 	}
 }
-
+/*Save the Time that the user write in the terminals*/
 void TERM_WriteHour(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
 	if(statemachine->shift_counter < 8){
 		Struct_Char_W.Time_Char[statemachine->shift_counter] =
@@ -331,6 +339,7 @@ void TERM_WriteHour(UART_ChannelType uartChannel, Term_StateMachineType* statema
 	}
 }
 
+/*Save the Date that the user write in the terminals*/
 void TERM_WriteDate(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
 	if(statemachine->shift_counter < 10){
 			Struct_Char_W.Date_Char[statemachine->shift_counter] =
@@ -372,6 +381,7 @@ void TERM_WriteDate(UART_ChannelType uartChannel, Term_StateMachineType* statema
 		}
 
 }
+/*Change the format of the time to be displayed*/
 void TERM_WriteFormat(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
 	if((UART_MailBoxData(uartChannel) == 13)){
 
@@ -412,6 +422,7 @@ void TERM_WriteFormat(UART_ChannelType uartChannel, Term_StateMachineType* state
 		}
 	}
 }
+/*Prints the date and time in the LCD*/
 void TERM_LCD(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
 
 	//What if [ESC]
@@ -443,7 +454,7 @@ void TERM_LCD(UART_ChannelType uartChannel, Term_StateMachineType* statemachine)
 				}
 
 }
-
+/*Enable the comunication between terminals or alone*/
 void TERM_communication(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
 
 	//What if [ESC]
@@ -510,7 +521,7 @@ void TERM_communication(UART_ChannelType uartChannel, Term_StateMachineType* sta
 					FIFO_PUSH(&statemachine->f,UART_MailBoxData(uartChannel));
 				}
 }
-
+/*read the value of the date */
 void TERM_ReadDate(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
 	UART_MailBoxData(uartChannel);
 	statemachine->currentMenuParameter = Option_param;
@@ -520,7 +531,7 @@ void TERM_ReadDate(UART_ChannelType uartChannel, Term_StateMachineType* statemac
 
 
 }
-
+/*read the value of the time */
 void TERM_ReadHour(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
 	UART_MailBoxData(uartChannel);
 	statemachine->currentMenuParameter = Option_param;
@@ -530,7 +541,7 @@ void TERM_ReadHour(UART_ChannelType uartChannel, Term_StateMachineType* statemac
 	TermHandler_StateMachine.RTCBusy = FALSE;
 
 }
-
+/*Prints the menu at both terminals*/
 void TERM_MenuDisp(UART_ChannelType uartChannel, Term_StateMachineType* statemachine){
 
 	statemachine->data = (UART_MailBoxData(uartChannel)) - '0';
@@ -581,7 +592,7 @@ void TERM_MenuDisp(UART_ChannelType uartChannel, Term_StateMachineType* statemac
 					TermHandler_StateMachine.Term1Com = TRUE;
 					if(TermHandler_StateMachine.Term2Com){
 					UART_putString(UART_4, "\r\nLa terminal 1 se ha conectado ... \r\n");
-					UART_putString(UART_0, "\r\nLa terminal 2 está conectada ... \r\n");
+					UART_putString(UART_0, "\r\nLa terminal 2 estï¿½ conectada ... \r\n");
 
 
 					}
@@ -590,7 +601,7 @@ void TERM_MenuDisp(UART_ChannelType uartChannel, Term_StateMachineType* statemac
 				case '2':
 					TermHandler_StateMachine.Term2Com = TRUE;
 					if(TermHandler_StateMachine.Term1Com){
-					UART_putString(UART_4, "\r\nLa terminal 1 está conectada ... \r\n");
+					UART_putString(UART_4, "\r\nLa terminal 1 estï¿½ conectada ... \r\n");
 					UART_putString(UART_0, "\r\nLa terminal 2 se ha conectado ... \r\n");
 					}
 					break;
@@ -598,7 +609,7 @@ void TERM_MenuDisp(UART_ChannelType uartChannel, Term_StateMachineType* statemac
 	}
 
 }
-
+/*inizilate the terminal 1 and return true when the function finish*/
 uint8 TERM1_init(){
 	GPIO_clockGating(GPIOB);
 	GPIO_pinControlRegisterType pinControlRegister = GPIO_MUX3;
@@ -611,7 +622,7 @@ uint8 TERM1_init(){
 
 	return TRUE;
 }
-
+/*inizilate the terminal 2 and return true when the function finish*/
 uint8 TERM2_init(){
 	GPIO_clockGating(GPIOC);
 	GPIO_pinControlRegisterType pinControlRegister = GPIO_MUX3;
@@ -624,7 +635,7 @@ uint8 TERM2_init(){
 
 	return TRUE;
 }
-
+/*Change the value of char into uint16*/
 void Cast_Memory_param(Term_StateMachineType* statemachine){
 	statemachine->address = 0;
 	for(uint8 i=0;i<4;i++){
@@ -645,7 +656,7 @@ void Cast_Memory_param(Term_StateMachineType* statemachine){
 
 
 }
-
+/*Enable the interrupts for the terminals */
 uint8 TERMHANDLER_init(){
 
 	NVIC_enableInterruptAndPriority(PIT_CH0_IRQ, PRIORITY_11);
@@ -672,23 +683,28 @@ uint8 TERMHANDLER_init(){
 	(*ftpr_Disp_Array[Term2_StateMachine.currentMenu])(UART_4, &Struct_Char_W);
 }
 
-
+/*Function called when a time out occurs, sets the flag and disables PIT1*/
 void timeout_Ocurred(){
 	timeout_flag = TRUE;
 	PIT_timerInterruptDisable(PIT_1);
 	PIT_timerDisable(PIT_1);
 }
 
+/** Function called before using I2C, to set a timer */
 void timeout_Enable(){
 	PIT_delay(PIT_1,SYSTEM_CLOCK,0.5);
 	PIT_timerInterruptEnable(PIT_1);
 	PIT_timerEnable(PIT_1);
 }
 
+/** Function called after using I2C, to disable the timer*/
 void timeout_Disable(){
+
+	//Check is timeout occured
 	if(timeout_flag == TRUE){
 		timeout_flag = FALSE;
 
+		/** If si, notify users*/
 		if(((Term1_StateMachine.currentMenu != CommunicationDisp)
 				&&(Term1_StateMachine.currentMenu != LCDDisp))){
 			Term1_StateMachine.currentMenu = MenuDisp;
@@ -712,6 +728,7 @@ void timeout_Disable(){
 
 	}
 
+	/** If not, continue*/
 	if((Term1_StateMachine.currentMenu == MenuDisp) && (timeout_notification == FALSE)){
 				(*ftpr_Disp_Array[Term1_StateMachine.currentMenu])(UART_0, &Struct_Char_W);
 
@@ -731,114 +748,4 @@ void timeout_Disable(){
 
 uint8 timeout_Flag(){
 	return timeout_flag;
-}
-
-
-void Button_Hour(){
-	if(((TermHandler_StateMachine.RTCBusy == FALSE)
-			&& (TermHandler_StateMachine.LCDBusy == FALSE)) || (manual_mode == TRUE)){
-		TermHandler_StateMachine.RTCBusy = TRUE;
-		TermHandler_StateMachine.LCDBusy = TRUE;
-
-		if(manual_mode == FALSE){
-		manual_mode = TRUE;
-
-		Button_Display(&Struct_Char_W);
-
-		BTTN_mailBoxData();
-		manual_counter_hour = 0;
-		manual_counter_date = 0;
-		return;
-		} else{
-			switch(BTTN_mailBoxData()){
-			case BUTTON_0:
-				if(manual_counter_hour >= 8){
-					return;
-				}
-				if(((Struct_Char_W.Time_Char[manual_counter_hour]) + 1) <= '9'){
-					Struct_Char_W.Time_Char[manual_counter_hour] += 1;
-				}
-				break;
-
-			case BUTTON_1:
-				if(manual_counter_hour >= 8){
-					return;
-				}
-				if((Struct_Char_W.Time_Char[manual_counter_hour] - 1) >= '0'){
-					Struct_Char_W.Time_Char[manual_counter_hour] -= 1;
-				}
-				break;
-
-			case BUTTON_2:
-
-				manual_counter_hour++;
-				if((manual_counter_hour == 2) || (manual_counter_hour == 5)){
-					manual_counter_hour++;
-				}
-				if(manual_counter_hour >= 8){
-					manual_counter_hour = 8;
-				}
-
-				break;
-
-			case BUTTON_3:
-				if(manual_counter_date >= 10){
-					manual_counter_date = 10;
-				}
-				if((Struct_Char_W.Date_Char[manual_counter_date] + 1) <= '9'){
-					Struct_Char_W.Date_Char[manual_counter_date] += 1;
-				}
-				break;
-
-			case BUTTON_4:
-				if(manual_counter_date >= 10){
-					manual_counter_date = 10;
-				}
-				if((Struct_Char_W.Date_Char[manual_counter_date] - 1) >= '0'){
-					Struct_Char_W.Date_Char[manual_counter_date] -= 1;
-				}
-				break;
-
-			case BUTTON_5:
-
-				manual_counter_date++;
-				if((manual_counter_date == 2) || (manual_counter_date == 5)){
-					manual_counter_date++;
-				}
-				if(manual_counter_date >= 10){
-					manual_counter_date = 10;
-				}
-
-				break;
-
-			default:
-				break;
-			}
-
-			Button_Display(&Struct_Char_W);
-
-		}
-
-		if((manual_counter_date == 10) && (manual_counter_hour == 8)){
-
-
-			Hour_Check(&Struct_Char_W,&Struct_RTC_W);
-			Date_Check(&Struct_Char_W,&Struct_RTC_W);
-			timeout_Enable();
-			RTC_writeHour(&Struct_RTC_W);
-			timeout_Disable();
-
-			timeout_Enable();
-			RTC_writeDate(&Struct_RTC_W);
-			timeout_Disable();
-
-		TermHandler_StateMachine.RTCBusy = FALSE;
-		TermHandler_StateMachine.LCDBusy = FALSE;
-		manual_mode = FALSE;
-
-
-		}
-
-	}
-
 }

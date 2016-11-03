@@ -47,25 +47,7 @@ void Info_Display(RTC_CharArray* info){
 	LCDNokia_sendString(info->Date_Char);
 }
 
-/*Write the eco from TeraTerm*/
+/*Clear the display and write the eco from TeraTerm*/
 void Eco_Display(uint8 data){
 	LCDNokia_sendChar(data);
 }
-
-void Button_Display(RTC_CharArray* info){
-	LCDNokia_clear();
-	LCDNokia_gotoXY(0,0);
-	LCDNokia_sendString("HH/MM/SS");
-	LCDNokia_gotoXY(0,1);
-	LCDNokia_sendString(info->Time_Char);
-	LCDNokia_gotoXY(0,2);
-	LCDNokia_sendString("B1(+)B2(-)B3(OK)");
-	LCDNokia_gotoXY(0,3);
-	LCDNokia_sendString("DD/MM/AAAA");
-	LCDNokia_gotoXY(0,4);
-	LCDNokia_sendString(info->Date_Char);
-	LCDNokia_gotoXY(0,5);
-	LCDNokia_sendString("B4(+)B5(-)B6(OK=");
-}
-
-

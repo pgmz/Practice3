@@ -54,7 +54,7 @@ void PORTC_IRQHandler(){
 	/*Clear the interruption flags*/
 	GPIO_clearInterrupt(GPIOC);
 	/*Digital Debouncer*/
-	delay(250);
+	delay(100);
 }
 
 /*return the flag*/
